@@ -44,12 +44,13 @@ export async function updateProposalStatus(
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  await db.proposal.updateMany({
+  const proposal = await db.proposal.update({
     where: { id: proposalId, userId: session.user.id },
     data: { status },
   })
 
   revalidatePath("/dashboard/proposals")
+  return { token: proposal.token }
 }
 
 export async function deleteProposal(proposalId: string) {
@@ -60,5 +61,13 @@ export async function deleteProposal(proposalId: string) {
     where: { id: proposalId, userId: session.user.id },
   })
 
+  revalidatePath("/dashboard/proposals")
+}
+
+export async function approveProposal(proposalId: string, signerName: string) {
+  await db.proposal.update({
+    where: { id: proposalId },
+    data: { status: "signed" },
+  })
   revalidatePath("/dashboard/proposals")
 }
