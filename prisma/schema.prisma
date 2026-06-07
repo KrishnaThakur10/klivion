@@ -21,6 +21,7 @@ model User {
   clients   Client[]
   proposals Proposal[]
   invoices  Invoice[]
+  settings  UserSettings?
 }
 
 model Account {
@@ -80,15 +81,17 @@ model Proposal {
 }
 
 model Invoice {
-  id        String   @id @default(cuid())
-  number    String
-  status    String   @default("draft")
-  dueDate   DateTime
-  total     Float
-  userId    String
-  clientId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String    @id @default(cuid())
+  number            String
+  status            String    @default("draft")
+  dueDate           DateTime
+  total             Float
+  userId            String
+  clientId          String?
+  razorpayOrderId   String?   // stores Razorpay order ID
+  razorpayPaymentId String?   // stores payment ID after payment
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   client    Client?    @relation(fields: [clientId], references: [id])
@@ -103,4 +106,19 @@ model LineItem {
   invoiceId   String
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+model UserSettings {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  businessName    String?
+  phone           String?
+  address         String?
+  website         String?
+  razorpayKeyId   String?
+  razorpaySecret  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

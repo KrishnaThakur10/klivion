@@ -20,7 +20,15 @@ const navItems = [
   { label: "Settings",  href: "/dashboard/settings",  icon: Settings },
 ]
 
-export function Sidebar() {
+export function Sidebar({
+  userName,
+  userEmail,
+  userImage,
+}: {
+  userName: string
+  userEmail: string
+  userImage: string | null
+}) {
   const pathname = usePathname()
 
   return (
@@ -58,18 +66,26 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom */}
-      <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-            U
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">User Name</p>
-            <p className="text-xs text-muted-foreground truncate">Free Plan</p>
-          </div>
-        </div>
+{/* Bottom */}
+<div className="p-4 border-t border-border">
+  <div className="flex items-center gap-3 px-3 py-2">
+    {userImage ? (
+      <img
+        src={userImage}
+        alt={userName}
+        className="w-8 h-8 rounded-full object-cover"
+      />
+    ) : (
+      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
+        {userName.charAt(0).toUpperCase()}
       </div>
+    )}
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium truncate">{userName}</p>
+      <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
+    </div>
+  </div>
+</div>
     </aside>
   )
 }

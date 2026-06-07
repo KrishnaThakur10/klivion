@@ -1,17 +1,23 @@
-import { Sidebar } from "@/components/sidebar";
-import React from 'react'
+import { Sidebar } from "@/components/sidebar"
+import { auth } from "@/lib/auth"
 
-function DashboardLayout({
+export default async function DashboardLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
+  const session = await auth()
+
   return (
-    <div className='flex h-screen bg-background'>
-      <Sidebar/>
-      <main className='flex-1 overflow-y-auto p-8'>{children}</main>
+    <div className="flex h-screen overflow-hidden bg-background">
+      <Sidebar
+        userName={session?.user?.name ?? "User"}
+        userEmail={session?.user?.email ?? ""}
+        userImage={session?.user?.image ?? null}
+      />
+      <main className="flex-1 overflow-y-auto p-8">
+        {children}
+      </main>
     </div>
   )
 }
-
-export default DashboardLayout
