@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { ProposalsClient } from "@/components/proposals-client"
+import { ProposalsPage } from "@/components/proposals-page"
 
-export default async function ProposalsPage() {
+export default async function Page() {
   const session = await auth()
   if (!session?.user?.id) return null
 
@@ -19,14 +19,16 @@ export default async function ProposalsPage() {
   ])
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Proposals</h1>
-        <p className="text-muted-foreground mt-1">
-          Create and manage your client proposals
-        </p>
-      </div>
-      <ProposalsClient proposals={proposals} clients={clients} />
-    </div>
+    <ProposalsPage
+      proposals={proposals.map(p => ({
+        id: p.id,
+        title: p.title,
+        status: p.status,
+        token: p.token,
+        createdAt: p.createdAt.toISOString(),
+        clientName: p.client?.name ?? null,
+      }))}
+      clients={clients.map(c => ({ id: c.id, name: c.name }))}
+    />
   )
 }

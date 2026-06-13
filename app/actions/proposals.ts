@@ -44,13 +44,22 @@ export async function updateProposalStatus(
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  const proposal = await db.proposal.update({
+  const existingProposal = await db.proposal.findFirst({
     where: { id: proposalId, userId: session.user.id },
+    select: { id: true, token: true },
+  })
+
+  if (!existingProposal) {
+    throw new Error("Proposal not found")
+  }
+
+  await db.proposal.update({
+    where: { id: existingProposal.id },
     data: { status },
   })
 
   revalidatePath("/dashboard/proposals")
-  return { token: proposal.token }
+  return { token: existingProposal.token }
 }
 
 export async function deleteProposal(proposalId: string) {

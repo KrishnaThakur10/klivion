@@ -1,187 +1,281 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-
 @custom-variant dark (&:is(.dark *));
 
+/* ── Design tokens — exact copy from dhero/webimg ── */
+:root {
+  --bg:                  #0a0a0c;
+  --bg-grid:             #121215;
+  --panel-glass:         rgba(22, 22, 26, 0.72);
+  --panel-glass-strong:  rgba(28, 28, 32, 0.88);
+  --hairline:            rgba(255, 255, 255, 0.08);
+  --hairline-strong:     rgba(255, 255, 255, 0.14);
+  --inset-fill:          rgba(255, 255, 255, 0.04);
+  --input-bg:            rgba(0, 0, 0, 0.32);
+  --input-bg-focus:      rgba(0, 0, 0, 0.45);
+
+  --text:                #f5f5f7;
+  --text-2:              #a1a1a6;
+  --text-3:              #6e6e73;
+
+  --accent:              #ffffff;
+  --accent-hover:        #ffffff;
+  --accent-press:        #e0e0e2;
+  --accent-soft:         rgba(255, 255, 255, 0.12);
+  --accent-on:           #0a0a0c;
+  --focus-ring:          rgba(255, 255, 255, 0.28);
+
+  --atmo-1:              rgba(255, 255, 255, 0.04);
+  --atmo-2:              rgba(255, 255, 255, 0.02);
+
+  --shadow-panel:
+    0 32px 80px -16px rgba(0, 0, 0, 0.7),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-pill:
+    0 12px 36px -8px rgba(0, 0, 0, 0.55),
+    0 0 0 0.5px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-primary:
+    inset 0 1px 0 rgba(255, 255, 255, 0.4),
+    0 8px 24px -6px rgba(0, 0, 0, 0.6),
+    0 0 0 0.5px rgba(255, 255, 255, 0.12);
+
+  --status-success:      #30d158;
+  --status-success-bg:   rgba(48, 209, 88, 0.14);
+  --status-error:        #ff453a;
+  --status-error-bg:     rgba(255, 69, 58, 0.14);
+  --status-warning:      #ff9f0a;
+  --status-warning-bg:   rgba(255, 159, 10, 0.14);
+
+  --font-ui:   'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+  --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-snap:  cubic-bezier(0.4, 0, 0.2, 1);
+  --r-panel:   16px;
+  --r-control: 11px;
+  --r-button:  8px;
+  --r-input:   7px;
+
+  font-family: var(--font-ui);
+  font-kerning: normal;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 @theme {
-  --color-background: hsl(0 0% 100%);
-  --color-foreground: hsl(222.2 84% 4.9%);
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(222.2 84% 4.9%);
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(222.2 84% 4.9%);
-  --color-primary: hsl(222.2 47.4% 11.2%);
-  --color-primary-foreground: hsl(210 40% 98%);
-  --color-secondary: hsl(210 40% 96.1%);
-  --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
-  --color-muted: hsl(210 40% 96.1%);
-  --color-muted-foreground: hsl(215.4 16.3% 46.9%);
-  --color-accent: hsl(210 40% 96.1%);
-  --color-accent-foreground: hsl(222.2 47.4% 11.2%);
-  --color-destructive: hsl(0 84.2% 60.2%);
-  --color-destructive-foreground: hsl(210 40% 98%);
-  --color-border: hsl(214.3 31.8% 91.4%);
-  --color-input: hsl(214.3 31.8% 91.4%);
-  --color-ring: hsl(222.2 84% 4.9%);
+  --color-background:       #0a0a0c;
+  --color-foreground:       #f5f5f7;
+  --color-card:             #121215;
+  --color-card-foreground:  #f5f5f7;
+  --color-popover:          #1c1c20;
+  --color-popover-foreground: #f5f5f7;
+  --color-primary:          #ffffff;
+  --color-primary-foreground: #0a0a0c;
+  --color-secondary:        #1c1c20;
+  --color-secondary-foreground: #f5f5f7;
+  --color-muted:            #1c1c20;
+  --color-muted-foreground: #6e6e73;
+  --color-accent:           rgba(255,255,255,0.06);
+  --color-accent-foreground: #f5f5f7;
+  --color-destructive:      #ff453a;
+  --color-destructive-foreground: #f5f5f7;
+  --color-border:           rgba(255,255,255,0.08);
+  --color-input:            rgba(0,0,0,0.32);
+  --color-ring:             rgba(255,255,255,0.28);
   --radius: 0.5rem;
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
+  * { border-color: rgba(255,255,255,0.08); box-sizing: border-box; }
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
+    background-color: #0a0a0c;
+    color: #f5f5f7;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--accent-soft); }
+  ::-webkit-scrollbar { width: 3px; height: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--hairline-strong); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-3); }
+}
+
+/* ── Magic card hover (cursor-tracked spotlight) ── */
+/* ── Magic card hover (cursor-tracked spotlight) ── */
+.magic-card {
+  --mx: 50%;
+  --my: 50%;
+  --magic-size: 260px;
+  --magic-glow: rgba(255, 255, 255, 0.055);
+  --magic-border: rgba(255, 255, 255, 0.45);
+  position: relative;
+  isolation: isolate;
+}
+.magic-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none; /* Ensures mouse events pass straight through */
+  opacity: 0;
+  transition: opacity 300ms var(--ease-snap);
+  background: radial-gradient(
+    var(--magic-size) circle at var(--mx) var(--my),
+    var(--magic-glow), transparent 65%
+  );
+}
+.magic-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;           /* 👈 Changed from 2 to 0 so it sits BEHIND text and buttons */
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none; /* Ensures mouse events pass straight through */
+  opacity: 0;
+  transition: opacity 300ms var(--ease-snap);
+  background: radial-gradient(
+    var(--magic-size) circle at var(--mx) var(--my),
+    var(--magic-border), transparent 65%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+.magic-card:hover::before,
+.magic-card:hover::after { opacity: 1; }
+
+/* 👈 Removed the ".magic-card > *" z-index override rule completely */
+/* ── Scroll reveal ── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
   }
 }
-
-/* ── Tiptap Editor Styles ── */
-.tiptap { outline: none; }
-
-/* Placeholder */
-.tiptap p.is-editor-empty:first-child::before {
-  color: var(--color-muted-foreground);
-  content: attr(data-placeholder);
-  float: left;
-  height: 0;
-  pointer-events: none;
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Headings */
-.tiptap h1 { font-size: 2rem; font-weight: 800; line-height: 1.2; margin: 1.2rem 0 0.6rem; }
-.tiptap h2 { font-size: 1.5rem; font-weight: 700; line-height: 1.3; margin: 1rem 0 0.5rem; }
-.tiptap h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; margin: 0.8rem 0 0.4rem; }
-.tiptap h4 { font-size: 1.1rem; font-weight: 600; line-height: 1.4; margin: 0.6rem 0 0.3rem; }
-
-/* Paragraph */
-.tiptap p { margin: 0.4rem 0; line-height: 1.7; }
-
-
-/* Fix text color — allow inline color styles */
-.tiptap span { color: inherit; }
-.tiptap span[style] { color: unset; }
-
-
-/* Fix checklist — box and text on same line */
-.tiptap ul[data-type="taskList"] li {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: flex-start !important;
-  gap: 0.5rem !important;
+@keyframes float-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.tiptap ul[data-type="taskList"] li > label {
-  display: flex !important;
-  align-items: center !important;
-  margin-top: 2px !important;
-  flex-shrink: 0 !important;
+/* ── Input styles ── */
+.ui-input {
+  width: 100%;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 0.5px solid var(--hairline-strong);
+  border-radius: var(--r-input);
+  padding: 8px 11px;
+  transition: border-color 120ms var(--ease-snap),
+              background 120ms var(--ease-snap),
+              box-shadow 120ms var(--ease-snap);
+  outline: none;
+}
+.ui-input:focus {
+  border-color: var(--text-2);
+  background: var(--input-bg-focus);
+  box-shadow: 0 0 0 3px var(--focus-ring);
+}
+.ui-input::placeholder { color: var(--text-3); }
+
+/* ── Panel glass ── */
+.panel {
+  background: var(--panel-glass);
+  border-radius: var(--r-panel);
+  border: 0.5px solid var(--hairline);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(20px);
 }
 
-.tiptap ul[data-type="taskList"] li > div {
-  flex: 1 !important;
-}
-
-.tiptap ul[data-type="taskList"] li p {
-  margin: 0 !important;
-}
-
-/* Fix bullet list — show the dot */
-.tiptap ul:not([data-type="taskList"]) {
-  list-style-type: disc !important;
-  padding-left: 1.5rem !important;
-  margin: 0.5rem 0 !important;
-}
-
-.tiptap ul:not([data-type="taskList"]) li {
-  display: list-item !important;
-  list-style-type: disc !important;
-  list-style-position: outside !important;
-}
-
-.tiptap ul:not([data-type="taskList"]) li p {
-  display: inline !important;
-  margin: 0 !important;
-}
-
-/* Fix ordered list */
-.tiptap ol {
-  list-style-type: decimal !important;
-  padding-left: 1.5rem !important;
-  margin: 0.5rem 0 !important;
-}
-
-.tiptap ol li {
-  display: list-item !important;
-  list-style-type: decimal !important;
-  list-style-position: outside !important;
-}
-
-.tiptap ol li p {
-  display: inline !important;
-  margin: 0 !important;
-}
-
-/* Task List */
-.tiptap ul[data-type="taskList"] { list-style: none; padding-left: 0.25rem; margin: 0.5rem 0; }
-.tiptap ul[data-type="taskList"] li { display: flex; align-items: flex-start; gap: 0.5rem; margin: 0.3rem 0; }
-.tiptap ul[data-type="taskList"] li > label { margin-top: 3px; cursor: pointer; flex-shrink: 0; }
-.tiptap ul[data-type="taskList"] li > label input[type="checkbox"] { width: 14px; height: 14px; }
-.tiptap ul[data-type="taskList"] li > div { flex: 1; min-width: 0; }
-
-/* Blockquote */
-.tiptap blockquote {
-  border-left: 3px solid var(--color-primary);
-  padding-left: 1rem;
-  margin: 0.8rem 0;
-  color: var(--color-muted-foreground);
-  font-style: italic;
-}
-
-/* Inline Code */
-.tiptap code {
-  background: var(--color-muted);
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  padding: 1px 6px;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85em;
-  color: #e11d48;
-}
-
-/* Code Block */
-.tiptap pre {
-  background: #1e1e2e;
-  border-radius: 10px;
-  padding: 1rem 1.2rem;
-  margin: 0.8rem 0;
-  overflow-x: auto;
-  border: 1px solid var(--color-border);
-}
-.tiptap pre code {
-  background: none;
+/* ── Primary button ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--r-button);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  background: var(--accent);
+  color: var(--accent-on);
+  box-shadow: var(--shadow-primary);
+  transition: opacity 150ms var(--ease-snap), transform 120ms var(--ease-snap);
+  cursor: pointer;
   border: none;
-  padding: 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.875rem;
-  color: #cdd6f4;
+  text-decoration: none;
 }
+.btn-primary:hover { opacity: 0.92; }
+.btn-primary:active { transform: scale(0.98); opacity: 0.85; }
 
-/* Horizontal Rule */
-.tiptap hr { border: none; border-top: 2px solid var(--color-border); margin: 1.5rem 0; }
+/* ── Ghost button ── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--r-button);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-ui);
+  color: var(--text-2);
+  background: var(--inset-fill);
+  border: 0.5px solid var(--hairline);
+  transition: color 120ms var(--ease-snap), background 120ms var(--ease-snap);
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-ghost:hover { color: var(--text); background: var(--atmo-1); }
 
-/* Links */
-.tiptap a { color: #2563eb; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.tiptap a:hover { color: #1d4ed8; }
-
-/* Highlight */
-.tiptap mark { border-radius: 3px; padding: 1px 2px; }
-
-/* Nested lists */
-.tiptap ul ul, .tiptap ol ol, .tiptap ul ol, .tiptap ol ul { margin: 0.2rem 0; }
-
-/* Formatting */
-.tiptap strong { font-weight: 700; }
+/* ── Tiptap ── */
+.tiptap { outline: none; font-family: var(--font-ui); }
+.tiptap p.is-editor-empty:first-child::before {
+  color: var(--text-3);
+  content: attr(data-placeholder);
+  float: left; height: 0; pointer-events: none;
+}
+.tiptap h1 { font-size: 1.875rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin: 1.2rem 0 0.6rem; color: var(--text); }
+.tiptap h2 { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.25; margin: 1rem 0 0.5rem; color: var(--text); }
+.tiptap h3 { font-size: 1.1rem; font-weight: 600; letter-spacing: -0.015em; line-height: 1.35; margin: 0.8rem 0 0.4rem; color: var(--text); }
+.tiptap p { margin: 0.4rem 0; line-height: 1.75; color: var(--text-2); font-size: 14px; }
+.tiptap ul:not([data-type="taskList"]) { list-style-type: disc !important; padding-left: 1.5rem !important; margin: 0.5rem 0 !important; }
+.tiptap ul:not([data-type="taskList"]) li { display: list-item !important; color: var(--text-2); }
+.tiptap ul:not([data-type="taskList"]) li p { display: inline !important; margin: 0 !important; }
+.tiptap ol { list-style-type: decimal !important; padding-left: 1.5rem !important; margin: 0.5rem 0 !important; }
+.tiptap ol li { display: list-item !important; color: var(--text-2); }
+.tiptap ol li p { display: inline !important; margin: 0 !important; }
+.tiptap ul[data-type="taskList"] { list-style: none; padding-left: 0.25rem; margin: 0.5rem 0; }
+.tiptap ul[data-type="taskList"] li { display: flex !important; align-items: flex-start !important; gap: 0.5rem !important; margin: 0.3rem 0; }
+.tiptap ul[data-type="taskList"] li > label { display: flex !important; align-items: center !important; margin-top: 3px !important; flex-shrink: 0 !important; }
+.tiptap ul[data-type="taskList"] li > label input[type="checkbox"] { width: 13px; height: 13px; accent-color: var(--accent); }
+.tiptap ul[data-type="taskList"] li > div { flex: 1; min-width: 0; }
+.tiptap ul[data-type="taskList"] li p { margin: 0 !important; }
+.tiptap blockquote { border-left: 1px solid var(--hairline-strong); padding-left: 1rem; margin: 0.8rem 0; color: var(--text-3); font-style: italic; }
+.tiptap code { background: var(--inset-fill); border: 0.5px solid var(--hairline-strong); border-radius: 4px; padding: 1px 6px; font-family: var(--font-mono); font-size: 0.82em; color: var(--text-2); }
+.tiptap pre { background: #000; border-radius: var(--r-control); padding: 1rem 1.2rem; margin: 0.8rem 0; overflow-x: auto; border: 0.5px solid var(--hairline); }
+.tiptap pre code { background: none; border: none; padding: 0; font-size: 0.85rem; color: var(--text-2); }
+.tiptap hr { border: none; border-top: 0.5px solid var(--hairline); margin: 1.5rem 0; pointer-events: none !important; }
+.tiptap a { color: var(--text); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hairline-strong); cursor: pointer; transition: text-decoration-color 150ms var(--ease-snap); }
+.tiptap a:hover { text-decoration-color: var(--text-2); }
+.tiptap mark { background: var(--accent-soft); color: var(--text); border-radius: 3px; padding: 1px 3px; }
+.tiptap strong { font-weight: 700; color: var(--text); }
 .tiptap em { font-style: italic; }
-.tiptap u { text-decoration: underline; }
-.tiptap s { text-decoration: line-through; }
-.tiptap sub { vertical-align: sub; font-size: 0.75em; }
-.tiptap sup { vertical-align: super; font-size: 0.75em; }

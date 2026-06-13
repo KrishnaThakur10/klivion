@@ -51,7 +51,7 @@ export function ClientsClient({ clients }: { clients: Client[] }) {
       {showForm && (
         <div className="bg-card border border-border rounded-xl p-6 mb-6">
           <h2 className="font-semibold mb-4">New Client</h2>
-          <form action={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(new FormData(e.currentTarget)) }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium mb-1 block">
                 Name <span className="text-red-500">*</span>

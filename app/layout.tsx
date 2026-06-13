@@ -1,13 +1,10 @@
 import type { Metadata } from "next"
-import { Geist } from "next/font/google"
 import "./globals.css"
 import Script from "next/script"
 
-const geist = Geist({ subsets: ["latin"] })
-
 export const metadata: Metadata = {
-  title: "Proposely",
-  description: "Proposals and invoices for freelancers",
+  title: "Klivio — Proposals & Invoices for Freelancers",
+  description: "Create professional proposals and get paid faster.",
 }
 
 export default function RootLayout({
@@ -17,12 +14,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${geist.className} min-h-screen bg-background antialiased`}>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen antialiased">
         {children}
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
-      <Script src="https://checkout.razorpay.com/v1/checkout.js"strategy="lazyOnload"/>
     </html>
-    
-    
   )
 }
