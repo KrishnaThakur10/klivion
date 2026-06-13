@@ -99,7 +99,7 @@ export function ProposalMenu({
         aria-haspopup="true"
         aria-expanded={open}
         aria-label="Proposal actions menu"
-        className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+        className="w-7 h-7 flex items-center justify-center rounded-lg cursor-pointer transition-colors hover:bg-[rgba(255,255,255,0.06)]"
         style={{
           color: open ? "var(--text)" : "var(--text-3)",
           background: open ? "rgba(255,255,255,0.08)" : "transparent",
@@ -110,9 +110,6 @@ export function ProposalMenu({
 
       {open && (
         <>
-          {/* Click outside backdrop to close */}
-          {/* <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} /> */}
-
           <div
             className="absolute right-0 top-8 z-20 w-44 rounded-xl py-1 overflow-hidden"
             role="menu"

@@ -10,9 +10,9 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground text-xl font-bold">P</span>
+            <span className="text-primary-foreground text-xl font-bold">K</span>
           </div>
-          <h1 className="text-2xl font-bold">Welcome to Proposely</h1>
+          <h1 className="text-2xl font-bold">Welcome to Klivio</h1>
           <p className="text-muted-foreground mt-2 text-sm">
             Sign in to manage your proposals and invoices
           </p>

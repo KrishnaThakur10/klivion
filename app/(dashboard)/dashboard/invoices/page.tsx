@@ -1,8 +1,8 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { InvoicesClient } from "@/components/invoices-client"
+import { InvoicesPage } from "@/components/invoices-page"
 
-export default async function InvoicesPage() {
+export default async function Page() {
   const session = await auth()
   if (!session?.user?.id) return null
 
@@ -19,14 +19,22 @@ export default async function InvoicesPage() {
   ])
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Invoices</h1>
-        <p className="text-muted-foreground mt-1">
-          Create and track your invoices
-        </p>
-      </div>
-      <InvoicesClient invoices={invoices} clients={clients} />
-    </div>
+    <InvoicesPage
+      invoices={invoices.map(inv => ({
+        id: inv.id,
+        number: inv.number,
+        status: inv.status,
+        dueDate: inv.dueDate.toISOString(),
+        total: inv.total,
+        clientName: inv.client?.name ?? null,
+        lineItems: inv.lineItems.map(li => ({
+          id: li.id,
+          description: li.description,
+          quantity: li.quantity,
+          rate: li.rate,
+        })),
+      }))}
+      clients={clients.map(c => ({ id: c.id, name: c.name }))}
+    />
   )
 }

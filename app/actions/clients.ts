@@ -5,7 +5,6 @@ import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
-// Validation schema
 const ClientSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
@@ -13,32 +12,30 @@ const ClientSchema = z.object({
   phone: z.string().optional(),
 })
 
-export async function createClient(formData: FormData) {
-  // 1. Check user is logged in
+export async function createClient(data: {
+  name: string
+  email: string
+  company?: string
+  phone?: string
+}) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  // 2. Validate the input
-  const validated = ClientSchema.safeParse({
-    name: formData.get("name"),
-    email: formData.get("email"),
-    company: formData.get("company"),
-    phone: formData.get("phone"),
-  })
-
+  const validated = ClientSchema.safeParse(data)
   if (!validated.success) {
     return { error: validated.error.issues[0].message }
   }
 
-  // 3. Save to database
   await db.client.create({
     data: {
-      ...validated.data,
+      name: validated.data.name,
+      email: validated.data.email,
+      company: validated.data.company || null,
+      phone: validated.data.phone || null,
       userId: session.user.id,
     },
   })
 
-  // 4. Refresh the clients page
   revalidatePath("/dashboard/clients")
   return { success: true }
 }
@@ -47,8 +44,7 @@ export async function deleteClient(clientId: string) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
 
-  // Make sure this client belongs to this user
-  await db.client.deleteMany({
+  await db.client.delete({
     where: { id: clientId, userId: session.user.id },
   })
 
