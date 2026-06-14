@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, useEffect, useRef } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import {
   createProposal,
@@ -59,7 +59,7 @@ function CopyButton({ text }: { text: string }) {
 }
 
 // 3-dot dropdown menu per row
-export function ProposalMenu({
+function ProposalMenu({
   proposal,
   onSend,
   onSign,
@@ -75,34 +75,21 @@ export function ProposalMenu({
   isPending: boolean
 }) {
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Listen for the Escape key to close the menu
-  useEffect(() => {
-    if (!open) return
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [open])
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative">
       <button
-        onClick={(e) => {
-          e.stopPropagation()
-          setOpen(!open)
-        }}
-        aria-haspopup="true"
-        aria-expanded={open}
-        aria-label="Proposal actions menu"
-        className="w-7 h-7 flex items-center justify-center rounded-lg cursor-pointer transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+        onClick={(e) => { e.stopPropagation(); setOpen(!open) }}
+        className="w-7 h-7 flex items-center justify-center rounded-lg transition-colors"
         style={{
           color: open ? "var(--text)" : "var(--text-3)",
           background: open ? "rgba(255,255,255,0.08)" : "transparent",
+        }}
+        onMouseEnter={e => {
+          if (!open) (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.06)"
+        }}
+        onMouseLeave={e => {
+          if (!open) (e.currentTarget as HTMLElement).style.background = "transparent"
         }}
       >
         <MoreHorizontal className="w-4 h-4" />
@@ -110,28 +97,28 @@ export function ProposalMenu({
 
       {open && (
         <>
+          {/* Click outside to close */}
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+
           <div
             className="absolute right-0 top-8 z-20 w-44 rounded-xl py-1 overflow-hidden"
-            role="menu"
             style={{
               background: "var(--bg-grid)",
               border: "0.5px solid var(--hairline-strong)",
               boxShadow: "var(--shadow-panel)",
             }}
           >
-            {/* Context-aware Actions */}
             {proposal.status === "draft" && (
               <button
                 onClick={() => { onSend(); setOpen(false) }}
                 disabled={isPending}
-                className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent disabled:opacity-50"
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent"
                 style={{ color: "var(--text-2)" }}
               >
                 <Send className="w-3.5 h-3.5 shrink-0" />
                 Send to client
               </button>
             )}
-
             {proposal.status === "sent" && (
               <>
                 <button
@@ -145,7 +132,7 @@ export function ProposalMenu({
                 <button
                   onClick={() => { onSign(); setOpen(false) }}
                   disabled={isPending}
-                  className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent disabled:opacity-50"
+                  className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent"
                   style={{ color: "var(--status-success)" }}
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
@@ -153,7 +140,6 @@ export function ProposalMenu({
                 </button>
               </>
             )}
-
             {proposal.status === "signed" && (
               <button
                 onClick={() => { onCopyLink(); setOpen(false) }}
@@ -167,11 +153,10 @@ export function ProposalMenu({
 
             <div style={{ height: "0.5px", background: "var(--hairline)", margin: "4px 0" }} />
 
-            {/* Danger Zone Action */}
             <button
               onClick={() => { onDelete(); setOpen(false) }}
               disabled={isPending}
-              className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent disabled:opacity-50"
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-accent"
               style={{ color: "var(--status-error)" }}
             >
               <Trash2 className="w-3.5 h-3.5 shrink-0" />
@@ -193,7 +178,8 @@ export function ProposalsPage({
 }) {
   const router = useRouter()
   const [view, setView] = useState<"list" | "new">("list")
-  const [proposals, setProposals] = useState(initial)
+  // Use props directly — router.refresh() causes Server Component to re-render with fresh DB data
+  const proposals = initial
   const [title, setTitle] = useState("")
   const [clientId, setClientId] = useState("")
   const [content, setContent] = useState("")
@@ -218,7 +204,7 @@ export function ProposalsPage({
         setClientId("")
         setContent("")
         setView("list")
-        router.refresh()
+        router.refresh() // re-fetches server data → new proposal appears in list
       }
     })
   }
@@ -226,14 +212,14 @@ export function ProposalsPage({
   function handleDelete(id: string) {
     startTransition(async () => {
       await deleteProposal(id)
-      setProposals(prev => prev.filter(p => p.id !== id))
+      router.refresh() // re-fetches → deleted item disappears
     })
   }
 
   function handleStatus(id: string, status: string) {
     startTransition(async () => {
       const result = await updateProposalStatus(id, status)
-      setProposals(prev => prev.map(p => p.id === id ? { ...p, status } : p))
+      router.refresh() // re-fetches → status badge updates
       if (status === "sent" && result?.token) {
         setShareLink(`${window.location.origin}/proposals/${result.token}`)
         setShowShare(true)

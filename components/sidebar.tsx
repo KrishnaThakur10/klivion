@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { redirect, usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
   Users, Settings, Sparkles
@@ -51,7 +51,7 @@ export function Sidebar({
         className="h-14 flex items-center px-4 shrink-0"
         style={{ borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}
       >
-        <div className="flex items-center gap-2">
+        <div onClick={() => { redirect("/") }} className="cursor-pointer flex items-center gap-2">
           <div
             className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
             style={{

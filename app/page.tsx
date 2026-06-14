@@ -1,541 +1,606 @@
+"use client"
+
+import { useEffect, useRef, useState } from "react"
+import type { MouseEvent } from "react"
 import Link from "next/link"
 import {
-  FileText, Receipt, Users, CreditCard,
-  Zap, CheckCircle2, ArrowRight, Sparkles,
-  Send, ShieldCheck, Smartphone, Clock, Plus
+  Zap, FileText, Link2, PenLine, Receipt,
+  CreditCard, Users, Wallet, Smartphone,
+  Gauge, LayoutGrid, ArrowRight,
+  Check, Plus, Minus, Send, Menu, X,
 } from "lucide-react"
 
-export default function LandingPage() {
+/* ── Primitives ── */
+function MonoLabel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <span className={`mono-label ${className}`}>{children}</span>
+}
+
+function PrimaryButton({ children, className = "", href, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: string }) {
+  const cls = `btn-panel inline-flex items-center justify-center gap-2 rounded-[11px] bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 active:scale-[0.98] ${className}`
+  if (href) return <Link href={href} className={cls}>{children}</Link>
+  return <button className={cls} {...rest}>{children}</button>
+}
+
+function GhostButton({ children, className = "", href, ...rest }: React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: string }) {
+  const cls = `btn-panel-ghost inline-flex items-center justify-center gap-2 rounded-[11px] bg-transparent px-5 py-3 text-sm font-semibold text-foreground hover:bg-white/[0.04] active:scale-[0.98] ${className}`
+  if (href) return <Link href={href} className={cls}>{children}</Link>
+  return <button className={cls} {...rest}>{children}</button>
+}
+
+function Pill({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ background: "var(--bg)", color: "var(--text)", fontFamily: "var(--font-ui)" }} className="min-h-screen overflow-x-hidden">
+    <span className="hairline-strong inline-flex items-center gap-2 rounded-full bg-white/[0.03] px-3.5 py-1.5 text-xs text-muted-foreground">
+      {children}
+    </span>
+  )
+}
 
-      {/* ── Nav ── */}
-      <nav className="sticky top-0 z-50 backdrop-blur-xl"
-        style={{ background: "rgba(10,10,12,0.7)", borderBottom: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-6xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: "#fff", boxShadow: "var(--shadow-primary)" }}>
-              <Sparkles className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <span className="h-px w-8 bg-border-strong" />
+      <MonoLabel>{children}</MonoLabel>
+      <span className="h-px w-8 bg-border-strong" />
+    </div>
+  )
+}
+
+/* Reveal on scroll */
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll(".reveal")
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add("is-visible")
+            io.unobserve(e.target)
+          }
+        })
+      },
+      { threshold: 0.12 }
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+}
+
+/* Magic card */
+function MagicCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const onMove = (e: MouseEvent<HTMLDivElement>) => {
+    const el = ref.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`)
+    el.style.setProperty("--my", `${e.clientY - r.top}px`)
+  }
+  return (
+    <div ref={ref} onMouseMove={onMove} className={`magic-card rounded-2xl p-6 ${className}`}>
+      <div className="magic-card-inner">{children}</div>
+    </div>
+  )
+}
+
+/* ── Navbar ── */
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener("scroll", onScroll)
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [])
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [open])
+
+  const links = [
+    { href: "#features", label: "Features" },
+    { href: "#how", label: "How it works" },
+    { href: "#pricing", label: "Pricing" },
+    { href: "#faq", label: "FAQ" },
+  ]
+
+  return (
+    <header className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${scrolled ? "pt-2" : "pt-4"}`}>
+      <div className="mx-auto w-full max-w-6xl px-3 sm:px-4">
+        <nav className={`glass relative grid grid-cols-[auto_1fr_auto] items-center gap-2 rounded-2xl px-2 py-2 transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] sm:px-3 ${scrolled ? "shadow-[0_10px_40px_-20px_rgba(0,0,0,0.6)]" : ""}`}>
+          {/* Brand */}
+          <a href="#top" className="flex min-w-0 items-center gap-2 pl-1 sm:gap-2.5 sm:pl-2">
+            <span className="btn-panel grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-primary text-primary-foreground">
+              <Zap size={16} strokeWidth={2.5} />
+            </span>
+            <span className="truncate font-bold tracking-tight">Klivio</span>
+          </a>
+
+          {/* Desktop links */}
+          <div className="hidden justify-center lg:flex">
+            <div className="hairline flex items-center gap-1 rounded-full bg-white/[0.02] px-1 py-1 text-sm">
+              {links.map((l) => (
+                <a key={l.href} href={l.href}
+                  className="rounded-full px-3.5 py-1.5 text-muted-foreground transition-colors duration-300 hover:bg-white/[0.06] hover:text-foreground">
+                  {l.label}
+                </a>
+              ))}
             </div>
-            <span className="text-[15px] font-semibold tracking-tight">Klivio</span>
           </div>
-          <div className="hidden md:flex items-center gap-8 text-[13px] font-medium" style={{ color: "var(--text-2)" }}>
-            <a href="#features" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.8 }}>Features</a>
-            <a href="#how" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.8 }}>How it works</a>
-            <a href="#pricing" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.8 }}>Pricing</a>
-            <a href="#faq" className="hover:opacity-100 transition-opacity" style={{ opacity: 0.8 }}>FAQ</a>
+          {/* Tablet links */}
+          <div className="hidden items-center justify-center gap-5 text-sm text-muted-foreground md:flex lg:hidden">
+            {links.map((l) => (
+              <a key={l.href} href={l.href} className="hover:text-foreground transition-colors">{l.label}</a>
+            ))}
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="btn-ghost text-[13px] hidden sm:flex">
-              Sign in
-            </Link>
-            <Link href="/login" className="btn-primary text-[13px]">
-              Get started <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
+          <div className="md:hidden" />
+
+          {/* Actions */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="hidden items-center gap-2 lg:flex">
+              <GhostButton href="/login" className="px-4 py-2 text-sm">Sign in</GhostButton>
+              <PrimaryButton href="/login" className="px-4 py-2 text-sm">Get Started</PrimaryButton>
+            </div>
+            <button
+              aria-label="Toggle menu"
+              aria-expanded={open}
+              onClick={() => setOpen((v) => !v)}
+              className="btn-panel-ghost grid h-9 w-9 place-items-center rounded-[10px] text-foreground md:hidden"
+            >
+              {open ? <X size={16} /> : <Menu size={16} />}
+            </button>
+          </div>
+        </nav>
+
+        {/* Mobile drawer */}
+        <div className={`md:hidden overflow-hidden transition-[max-height,opacity,transform] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] ${open ? "mt-2 max-h-[420px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"}`}>
+          <div className="glass rounded-2xl p-3">
+            <ul className="flex flex-col">
+              {links.map((l) => (
+                <li key={l.href}>
+                  <a href={l.href} onClick={() => setOpen(false)}
+                    className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-foreground/90 hover:bg-white/[0.04]">
+                    <span>{l.label}</span>
+                    <ArrowRight size={14} className="text-muted-foreground" />
+                  </a>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
+              <GhostButton href="/login" className="w-full">Sign in</GhostButton>
+              <PrimaryButton href="/login" className="w-full">
+                Get Started <ArrowRight size={14} />
+              </PrimaryButton>
+            </div>
           </div>
         </div>
-      </nav>
+      </div>
+    </header>
+  )
+}
 
-      {/* ── Hero ── */}
-      <section className="relative pt-20 md:pt-28 pb-16 px-5 md:px-8 text-center overflow-hidden">
-        {/* Radial glow arc */}
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
-          style={{
-            width: "1200px",
-            height: "600px",
-            background: "radial-gradient(ellipse 50% 50% at 50% 0%, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 40%, transparent 70%)",
-            filter: "blur(40px)",
-          }}
-        />
-        <div
-          className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
-          style={{
-            width: "800px",
-            height: "400px",
-            borderRadius: "50%",
-            background: "var(--bg)",
-            boxShadow: "0 0 120px 60px rgba(255,255,255,0.06)",
-            filter: "blur(20px)",
-          }}
-        />
+/* ── Ambient Backdrop ── */
+function AmbientBackdrop() {
+  return (
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className="perspective-floor absolute inset-x-0 bottom-0 h-[80vh] opacity-40" />
+      <div className="orb drift-slow absolute left-1/2 top-1/3 h-[520px] w-[680px] -translate-x-1/2 opacity-60" />
+      <div className="orb drift-slower absolute -left-32 top-1/2 h-[420px] w-[420px] opacity-50" />
+      <div className="orb drift-slow absolute -right-32 top-2/3 h-[380px] w-[380px] opacity-40" style={{ animationDelay: "4s" }} />
+      <div className="vignette absolute inset-0" />
+    </div>
+  )
+}
 
-        <div className="relative max-w-3xl mx-auto" style={{ animation: "float-in 700ms var(--ease-apple) both" }}>
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full mb-6 text-[12px] font-medium"
-            style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline-strong)", color: "var(--text-2)" }}
-          >
-            <Zap className="w-3 h-3" style={{ color: "var(--status-warning)" }} />
+function WireframeRing({ className = "" }: { className?: string }) {
+  return (
+    <div aria-hidden className={`pointer-events-none absolute ${className}`}>
+      <div className="spin-y relative h-full w-full">
+        <div className="absolute inset-0 rounded-full border border-white/15" />
+        <div className="absolute inset-4 rounded-full border border-white/10" />
+        <div className="absolute inset-10 rounded-full border border-white/[0.06]" />
+      </div>
+    </div>
+  )
+}
+
+/* ── Hero ── */
+function Hero() {
+  return (
+    <section id="top" className="relative overflow-hidden pt-40 pb-24">
+      <div className="hero-glow pointer-events-none absolute inset-x-0 -top-32 h-[720px]" aria-hidden />
+      <div className="grid-bg pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" aria-hidden />
+      <WireframeRing className="left-[-180px] top-[180px] h-[420px] w-[420px] opacity-50" />
+      <WireframeRing className="right-[-200px] top-[120px] h-[520px] w-[520px] opacity-40" />
+      <div className="pulse-dot pointer-events-none absolute left-[12%] top-[28%] h-1.5 w-1.5 rounded-full bg-white/60" aria-hidden />
+      <div className="pulse-dot pointer-events-none absolute right-[14%] top-[34%] h-1 w-1 rounded-full bg-white/40" style={{ animationDelay: "0.8s" }} aria-hidden />
+      <div className="pulse-dot pointer-events-none absolute left-[20%] top-[60%] h-1 w-1 rounded-full bg-white/50" style={{ animationDelay: "1.6s" }} aria-hidden />
+
+      <div className="relative mx-auto max-w-5xl px-4 text-center">
+        <div className="reveal inline-flex">
+          <Pill>
+            <Zap size={12} className="text-foreground" />
             Built for freelancers & agencies
-          </div>
-
-          <h1
-            className="text-[40px] md:text-[64px] font-bold leading-[1.05] tracking-[-0.03em] mb-5"
-            style={{ color: "var(--text)" }}
-          >
-            Proposals & invoices<br />that get you <em style={{ fontStyle: "italic", fontWeight: 600 }}>paid faster</em>
-          </h1>
-
-          <p className="text-[15px] md:text-[17px] max-w-xl mx-auto mb-8" style={{ color: "var(--text-2)" }}>
-            Create stunning proposals, send professional invoices, and accept
-            payments online — all in one place. Stop chasing clients, start
-            getting paid.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-12">
-            <Link href="/login" className="btn-primary text-[14px] px-6 py-3 w-full sm:w-auto justify-center">
-              Start for free <ArrowRight className="w-4 h-4" />
-            </Link>
-            <a href="#how" className="btn-ghost text-[14px] px-6 py-3 w-full sm:w-auto justify-center">
-              See how it works
-            </a>
-          </div>
+          </Pill>
+        </div>
+        <h1 className="reveal mt-6 text-balance text-5xl font-extrabold leading-[1.05] tracking-tight md:text-7xl">
+          Proposals & invoices that
+          <br />
+          <span className="font-serif italic font-medium text-muted-foreground"
+            style={{ fontFamily: "'Instrument Serif', 'Iowan Old Style', Georgia, serif" }}>
+            get you paid faster
+          </span>
+        </h1>
+        <p className="reveal mx-auto mt-6 max-w-2xl text-balance text-base text-muted-foreground md:text-lg">
+          Create proposals clients love, send professional invoices, and accept online payments —
+          all in one calm, premium workspace.
+        </p>
+        <div className="reveal mt-9 flex flex-wrap items-center justify-center gap-3">
+          <PrimaryButton href="/login">
+            Start for free <ArrowRight size={16} />
+          </PrimaryButton>
+          <GhostButton href="#how">See how it works</GhostButton>
         </div>
 
-        {/* Dashboard preview */}
-        <div className="relative max-w-4xl mx-auto" style={{ animation: "float-in 900ms var(--ease-apple) both" }}>
-          <div
-            className="rounded-2xl overflow-hidden mx-4 md:mx-0"
-            style={{
-              background: "var(--bg-grid)",
-              border: "0.5px solid var(--hairline-strong)",
-              boxShadow: "var(--shadow-panel)",
-            }}
-          >
-            {/* Fake browser bar */}
-            <div className="flex items-center gap-2 px-4 py-3" style={{ borderBottom: "0.5px solid var(--hairline)" }}>
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
-                <div className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,0.15)" }} />
-              </div>
-              <div
-                className="flex-1 max-w-xs mx-auto rounded-md text-center text-[11px] py-1"
-                style={{ background: "var(--inset-fill)", color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
-              >
-                klivio.app/dashboard
-              </div>
+        {/* Dashboard mockup */}
+        <div className="reveal mt-20 [perspective:1800px]">
+          <div className="float-tilt mx-auto max-w-5xl">
+            <div className="hairline-strong relative rounded-2xl bg-surface p-1.5 shadow-[0_60px_120px_-40px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)]">
+              <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-b from-white/10 to-transparent opacity-60" aria-hidden />
+              <img
+                src="/dashboard-mockup.png"
+                alt="Klivio dashboard showing earnings, proposals, and invoices"
+                width={1536}
+                height={1024}
+                className="relative w-full rounded-xl"
+              />
             </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
 
-            {/* Dashboard mock content */}
-            <div className="p-4 md:p-6">
-              {/* Stat cards row */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-3 md:mb-4">
-                {[
-                  { label: "Total Earned", value: "₹84,500", color: "var(--status-success)" },
-                  { label: "Proposals", value: "12", color: "var(--text-2)" },
-                  { label: "Outstanding", value: "₹12,000", color: "var(--text-2)" },
-                  { label: "Clients", value: "8", color: "var(--text-2)" },
-                ].map(s => (
-                  <div key={s.label} className="rounded-xl p-3 md:p-4 text-left"
-                    style={{ background: "rgba(255,255,255,0.03)", border: "0.5px solid var(--hairline)" }}>
-                    <p className="text-[9px] md:text-[10px] font-semibold uppercase tracking-wider mb-1.5"
-                      style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                      {s.label}
-                    </p>
-                    <p className="text-[16px] md:text-[20px] font-bold" style={{ color: s.color === "var(--status-success)" ? s.color : "var(--text)" }}>
-                      {s.value}
-                    </p>
-                  </div>
-                ))}
-              </div>
+/* ── Capability Strip ── */
+function CapabilityStrip() {
+  const items = [
+    { icon: FileText, label: "Smart Proposals" },
+    { icon: Receipt, label: "Invoicing" },
+    { icon: CreditCard, label: "Online Payments" },
+    { icon: Users, label: "Client Management" },
+  ]
+  return (
+    <section className="relative py-20">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="reveal text-center">
+          <MonoLabel>Everything you need to run your freelance business</MonoLabel>
+        </div>
+        <div className="reveal mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4">
+          {items.map(({ icon: Icon, label }) => (
+            <div key={label} className="flex flex-col items-center justify-center gap-3 bg-background px-6 py-10">
+              <span className="hairline-strong grid h-11 w-11 place-items-center rounded-xl bg-white/[0.03]">
+                <Icon size={18} />
+              </span>
+              <span className="text-sm font-medium">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
-              {/* Invoice rows */}
-              <div className="rounded-xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "0.5px solid var(--hairline)" }}>
-                <div className="px-4 py-3" style={{ borderBottom: "0.5px solid var(--hairline)" }}>
-                  <p className="text-[12px] font-semibold text-left" style={{ color: "var(--text)" }}>Recent Invoices</p>
-                </div>
-                {[
-                  { num: "INV-0012", client: "Acme Studio", amount: "₹24,000", status: "Paid", color: "var(--status-success)" },
-                  { num: "INV-0011", client: "Bright Labs", amount: "₹18,500", status: "Sent", color: "var(--text-2)" },
-                  { num: "INV-0010", client: "Nova Design", amount: "₹9,200", status: "Paid", color: "var(--status-success)" },
-                ].map((row, i) => (
-                  <div key={row.num} className="flex items-center justify-between px-4 py-2.5"
-                    style={{ borderBottom: i < 2 ? "0.5px solid rgba(255,255,255,0.04)" : "none" }}>
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: row.color }} />
-                      <span className="text-[11px] md:text-[12px] font-medium" style={{ color: "var(--text)", fontFamily: "var(--font-mono)" }}>
-                        {row.num}
+/* ── Features ── */
+const FEATURES = [
+  { icon: FileText, title: "Beautiful Proposals", desc: "Rich text editor with formatting, images, and sections. Create proposals that make clients say yes." },
+  { icon: Link2, title: "Shareable Links", desc: "Send a link, not a PDF attachment. Clients view and approve proposals right in their browser." },
+  { icon: PenLine, title: "E-Signatures", desc: "Clients sign digitally with their name. No printing, scanning, or back-and-forth emails." },
+  { icon: Receipt, title: "Professional Invoices", desc: "Line items, taxes, auto-numbering — invoices that look like they came from a real business." },
+  { icon: CreditCard, title: "Get Paid Online", desc: "Accept UPI, cards, and net banking via Razorpay. Money goes straight to your account." },
+  { icon: Users, title: "Client Management", desc: "Keep all your clients, their contact details, and history organized in one place." },
+]
+
+function Features() {
+  return (
+    <section id="features" className="relative py-28">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="reveal text-center">
+          <SectionLabel>Features</SectionLabel>
+          <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-5xl">
+            Everything to win clients <br className="hidden md:block" />
+            and get paid on time
+          </h2>
+        </div>
+        <div className="mt-16 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="reveal">
+              <MagicCard className="h-full">
+                <span className="hairline-strong inline-grid h-11 w-11 place-items-center rounded-xl bg-white/[0.03]">
+                  <Icon size={18} />
+                </span>
+                <h3 className="mt-5 text-lg font-semibold">{title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+              </MagicCard>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── How it works ── */
+const STEPS = [
+  { n: "01", icon: PenLine, title: "Create & Send", desc: "Write a proposal with our rich editor, attach your client, and send a shareable link in seconds." },
+  { n: "02", icon: Check, title: "Client Approves", desc: "Your client opens the link, reviews everything, and signs digitally — no app or account needed." },
+  { n: "03", icon: Wallet, title: "Invoice & Get Paid", desc: "Send a professional invoice with a payment link. Money lands directly in your Razorpay account." },
+]
+
+function HowItWorks() {
+  return (
+    <section id="how" className="relative py-24 sm:py-28">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="reveal text-center">
+          <SectionLabel>How it works</SectionLabel>
+          <h2 className="mt-6 text-balance text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+            From pitch to payment in 3 steps
+          </h2>
+        </div>
+        <div className="relative mt-14 sm:mt-16">
+          <div aria-hidden
+            className="pointer-events-none absolute left-[34px] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border-strong to-transparent md:left-0 md:right-0 md:top-[64px] md:bottom-auto md:h-px md:w-auto md:bg-gradient-to-r"
+          />
+          <div className="grid gap-5 md:grid-cols-3 md:gap-6">
+            {STEPS.map(({ n, icon: Icon, title, desc }, i) => (
+              <div key={n} className="reveal" style={{ transitionDelay: `${i * 80}ms` }}>
+                <MagicCard className="h-full p-6 sm:p-7">
+                  <div className="grid grid-cols-[auto_1fr] items-start gap-4 md:block">
+                    <div className="relative">
+                      <span className="btn-panel relative z-10 grid h-[56px] w-[56px] shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground sm:h-[64px] sm:w-[64px]">
+                        <Icon size={22} strokeWidth={2.2} />
                       </span>
-                      <span className="text-[11px] md:text-[12px] hidden sm:inline" style={{ color: "var(--text-3)" }}>
-                        {row.client}
+                      <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 blur-2xl opacity-40" />
+                      <span className="hairline-strong absolute -right-1.5 -top-1.5 z-20 grid h-6 min-w-6 place-items-center rounded-full bg-background px-1.5 font-mono text-[10px] tracking-widest text-foreground">
+                        {n}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] md:text-[12px] font-semibold" style={{ color: "var(--text)" }}>{row.amount}</span>
-                      <span className="text-[9px] md:text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-                        style={{ background: row.color === "var(--status-success)" ? "var(--status-success-bg)" : "var(--inset-fill)", color: row.color, fontFamily: "var(--font-mono)" }}>
-                        {row.status}
-                      </span>
+                    <div className="min-w-0 md:mt-6">
+                      <MonoLabel>Step {n}</MonoLabel>
+                      <h3 className="mt-1.5 text-lg font-semibold sm:text-xl">{title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
                     </div>
                   </div>
-                ))}
+                </MagicCard>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Trust strip ── */}
-      <section className="py-10 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)", borderBottom: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-5xl mx-auto">
-          <p className="text-center text-[11px] font-medium uppercase tracking-[0.15em] mb-6" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-            Everything you need to run your freelance business
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {[
-              { icon: FileText, label: "Smart Proposals" },
-              { icon: Receipt, label: "Invoicing" },
-              { icon: CreditCard, label: "Online Payments" },
-              { icon: Users, label: "Client Management" },
-            ].map(item => {
-              const Icon = item.icon
-              return (
-                <div key={item.label} className="flex flex-col items-center gap-2 py-2">
-                  <Icon className="w-5 h-5" style={{ color: "var(--text-3)" }} strokeWidth={1.5} />
-                  <span className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>{item.label}</span>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Features ── */}
-      <section id="features" className="py-20 md:py-28 px-5 md:px-8">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14 reveal">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.15em] mb-3" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              Features
-            </p>
-            <h2 className="text-[28px] md:text-[40px] font-bold tracking-[-0.03em] leading-tight mb-3">
-              Everything to win clients<br />and get paid on time
-            </h2>
-            <p className="text-[14px] md:text-[15px] max-w-lg mx-auto" style={{ color: "var(--text-2)" }}>
-              From the first pitch to the final payment — Klivio handles the
-              business side so you can focus on the work.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              {
-                icon: FileText,
-                title: "Beautiful Proposals",
-                desc: "Rich text editor with formatting, images, and sections. Create proposals that make clients say yes.",
-              },
-              {
-                icon: Send,
-                title: "Shareable Links",
-                desc: "Send a link, not a PDF attachment. Clients view and approve proposals right in their browser.",
-              },
-              {
-                icon: CheckCircle2,
-                title: "E-Signatures",
-                desc: "Clients sign digitally with their name. No printing, scanning, or back-and-forth emails.",
-              },
-              {
-                icon: Receipt,
-                title: "Professional Invoices",
-                desc: "Line items, taxes, auto-numbering — invoices that look like they came from a real business.",
-              },
-              {
-                icon: CreditCard,
-                title: "Get Paid Online",
-                desc: "Accept UPI, cards, and net banking via Razorpay. Money goes straight to your account.",
-              },
-              {
-                icon: Users,
-                title: "Client Management",
-                desc: "Keep all your clients, their contact details, and history organized in one place.",
-              },
-            ].map((f) => {
-              const Icon = f.icon
-              return (
-                <div
-                  key={f.title}
-                  className="reveal rounded-2xl p-6"
-                  style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)", boxShadow: "var(--shadow-panel)" }}
-                >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                    style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}>
-                    <Icon className="w-4.5 h-4.5" style={{ color: "var(--text-2)" }} strokeWidth={1.5} />
-                  </div>
-                  <h3 className="text-[15px] font-semibold mb-2" style={{ color: "var(--text)" }}>{f.title}</h3>
-                  <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-3)" }}>{f.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── How it works ── */}
-      <section id="how" className="py-20 md:py-28 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14 reveal">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.15em] mb-3" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              How it works
-            </p>
-            <h2 className="text-[28px] md:text-[40px] font-bold tracking-[-0.03em] leading-tight">
-              From pitch to payment in 3 steps
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              {
-                step: "01",
-                title: "Create & Send",
-                desc: "Write a proposal with our rich editor, attach your client, and send a shareable link in seconds.",
-                icon: FileText,
-              },
-              {
-                step: "02",
-                title: "Client Approves",
-                desc: "Your client opens the link, reviews everything, and signs digitally — no app or account needed.",
-                icon: CheckCircle2,
-              },
-              {
-                step: "03",
-                title: "Invoice & Get Paid",
-                desc: "Send a professional invoice with a payment link. Money lands directly in your Razorpay account.",
-                icon: CreditCard,
-              },
-            ].map((s) => {
-              const Icon = s.icon
-              return (
-                <div key={s.step} className="reveal text-center md:text-left">
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-4 mx-auto md:mx-0"
-                    style={{ background: "#fff", boxShadow: "var(--shadow-primary)" }}
-                  >
-                    <Icon className="w-5 h-5" style={{ color: "#0a0a0c" }} strokeWidth={1.75} />
-                  </div>
-                  <p className="text-[11px] font-semibold mb-2" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                    STEP {s.step}
-                  </p>
-                  <h3 className="text-[16px] font-semibold mb-2" style={{ color: "var(--text)" }}>{s.title}</h3>
-                  <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-3)" }}>{s.desc}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Why Klivio (USP) ── */}
-      <section className="py-20 md:py-28 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-14 reveal">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.15em] mb-3" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              Why Klivio
-            </p>
-            <h2 className="text-[28px] md:text-[40px] font-bold tracking-[-0.03em] leading-tight">
-              Built different from the rest
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Your money, your account",
-                desc: "Payments go directly to your own Razorpay account. We never touch your client's money.",
-              },
-              {
-                icon: Smartphone,
-                title: "Mobile-first design",
-                desc: "Manage proposals and invoices from your phone. Fully responsive on every device.",
-              },
-              {
-                icon: Clock,
-                title: "Built for speed",
-                desc: "Create a proposal in under 2 minutes. Send an invoice in seconds. No bloated workflows.",
-              },
-              {
-                icon: Sparkles,
-                title: "No clutter, just essentials",
-                desc: "Proposals, invoices, clients, payments. The tools freelancers actually use, nothing else.",
-              },
-            ].map(f => {
-              const Icon = f.icon
-              return (
-                <div key={f.title} className="reveal flex items-start gap-4 p-5 rounded-2xl"
-                  style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)" }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                    style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}>
-                    <Icon className="w-4.5 h-4.5" style={{ color: "var(--text-2)" }} strokeWidth={1.5} />
-                  </div>
-                  <div>
-                    <h3 className="text-[14px] font-semibold mb-1" style={{ color: "var(--text)" }}>{f.title}</h3>
-                    <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-3)" }}>{f.desc}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Pricing ── */}
-      <section id="pricing" className="py-20 md:py-28 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-14 reveal">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.15em] mb-3" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              Pricing
-            </p>
-            <h2 className="text-[28px] md:text-[40px] font-bold tracking-[-0.03em] leading-tight mb-3">
-              Simple pricing, no surprises
-            </h2>
-            <p className="text-[14px]" style={{ color: "var(--text-2)" }}>
-              Start free. Upgrade when you're ready to scale.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
-            {/* Free */}
-            <div className="reveal rounded-2xl p-6"
-              style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)", boxShadow: "var(--shadow-panel)" }}>
-              <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-2)" }}>Free</p>
-              <p className="text-[32px] font-bold mb-1" style={{ color: "var(--text)" }}>₹0</p>
-              <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>forever, to get you started</p>
-              <ul className="space-y-2.5 mb-6">
-                {["3 proposals / month", "5 invoices / month", "1 client", "Basic templates"].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-[13px]" style={{ color: "var(--text-2)" }}>
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-3)" }} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/login" className="btn-ghost w-full justify-center text-[13px]">
-                Get started
-              </Link>
-            </div>
-
-            {/* Pro */}
-            <div className="reveal rounded-2xl p-6 relative"
-              style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline-strong)", boxShadow: "var(--shadow-panel)" }}>
-              <div className="absolute -top-3 right-6 px-2.5 py-1 rounded-full text-[10px] font-semibold"
-                style={{ background: "#fff", color: "#0a0a0c", fontFamily: "var(--font-mono)" }}>
-                MOST POPULAR
-              </div>
-              <p className="text-[13px] font-semibold mb-1" style={{ color: "var(--text-2)" }}>Pro</p>
-              <p className="text-[32px] font-bold mb-1" style={{ color: "var(--text)" }}>
-                ₹499<span className="text-[14px] font-medium" style={{ color: "var(--text-3)" }}>/month</span>
-              </p>
-              <p className="text-[12px] mb-5" style={{ color: "var(--text-3)" }}>for growing freelancers</p>
-              <ul className="space-y-2.5 mb-6">
-                {["Unlimited proposals", "Unlimited invoices", "Unlimited clients", "Online payments (Razorpay)", "E-signatures", "Priority support"].map(item => (
-                  <li key={item} className="flex items-center gap-2 text-[13px]" style={{ color: "var(--text)" }}>
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--status-success)" }} />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Link href="/login" className="btn-primary w-full justify-center text-[13px]">
-                Start free trial
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── FAQ ── */}
-      <section id="faq" className="py-20 md:py-28 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12 reveal">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.15em] mb-3" style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              FAQ
-            </p>
-            <h2 className="text-[28px] md:text-[40px] font-bold tracking-[-0.03em] leading-tight">
-              Questions, answered
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {[
-              {
-                q: "How do I get paid?",
-                a: "You connect your own Razorpay account in Settings. When a client pays an invoice, the money goes directly to your account — Klivio never touches it.",
-              },
-              {
-                q: "Can my clients pay via UPI?",
-                a: "Yes. Razorpay supports UPI, cards, net banking, and wallets — covering virtually every payment method used in India.",
-              },
-              {
-                q: "Do clients need an account?",
-                a: "No. Clients receive a simple link to view and approve proposals or pay invoices — no signup required on their end.",
-              },
-              {
-                q: "Is Klivio mobile friendly?",
-                a: "Yes, the entire dashboard and client-facing pages are fully responsive and work great on phones and tablets.",
-              },
-              {
-                q: "Can I cancel anytime?",
-                a: "Yes. There's no lock-in — upgrade, downgrade, or cancel your plan anytime from Settings.",
-              },
-            ].map((item) => (
-              <details
-                key={item.q}
-                className="reveal group rounded-2xl px-5 py-4 cursor-pointer"
-                style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)" }}
-              >
-                <summary className="flex items-center justify-between text-[14px] font-medium list-none" style={{ color: "var(--text)" }}>
-                  {item.q}
-                  <span className="ml-4 transition-transform group-open:rotate-45" style={{ color: "var(--text-3)" }}>
-                    <Plus className="w-4 h-4" />
-                  </span>
-                </summary>
-                <p className="text-[13px] mt-3 leading-relaxed" style={{ color: "var(--text-3)" }}>
-                  {item.a}
-                </p>
-              </details>
             ))}
           </div>
         </div>
-      </section>
+      </div>
+    </section>
+  )
+}
 
-      {/* ── Final CTA ── */}
-      <section className="py-20 md:py-28 px-5 md:px-8 text-center relative overflow-hidden" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-          style={{
-            width: "900px",
-            height: "400px",
-            background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-        <div className="relative max-w-2xl mx-auto reveal">
-          <h2 className="text-[28px] md:text-[44px] font-bold tracking-[-0.03em] leading-tight mb-4">
-            Stop chasing clients.<br />Start getting paid.
+/* ── Why Klivio ── */
+const USPS = [
+  { icon: Wallet, title: "Your money, your account", desc: "Payments go directly to your own Razorpay account. We never touch your client's money." },
+  { icon: Smartphone, title: "Mobile-first design", desc: "Manage proposals and invoices from your phone. Fully responsive on every device." },
+  { icon: Gauge, title: "Built for speed", desc: "Create a proposal in under 2 minutes. Send an invoice in seconds. No bloated workflows." },
+  { icon: LayoutGrid, title: "No clutter, just essentials", desc: "Proposals, invoices, clients, payments. The tools freelancers actually use, nothing else." },
+]
+
+function Why() {
+  return (
+    <section className="relative py-28">
+      <div className="mx-auto max-w-6xl px-4">
+        <div className="reveal text-center">
+          <SectionLabel>Why Klivio</SectionLabel>
+          <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-5xl">
+            Built different from the rest
           </h2>
-          <p className="text-[14px] md:text-[15px] mb-8" style={{ color: "var(--text-2)" }}>
-            Join freelancers who use Klivio to send proposals, invoice clients,
-            and get paid online — all in one place.
-          </p>
-          <Link href="/login" className="btn-primary text-[14px] px-8 py-3.5 inline-flex">
-            Get started for free <ArrowRight className="w-4 h-4" />
-          </Link>
         </div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer className="py-10 px-5 md:px-8" style={{ borderTop: "0.5px solid var(--hairline)" }}>
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center" style={{ background: "#fff" }}>
-              <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+        <div className="mt-16 grid gap-5 md:grid-cols-2">
+          {USPS.map(({ icon: Icon, title, desc }) => (
+            <div key={title} className="reveal">
+              <MagicCard className="h-full">
+                <div className="flex gap-5">
+                  <span className="hairline-strong grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/[0.03]">
+                    <Icon size={18} />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-lg font-semibold">{title}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{desc}</p>
+                  </div>
+                </div>
+              </MagicCard>
             </div>
-            <span className="text-[13px] font-semibold">Klivio</span>
-          </div>
-          <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-            © 2026 Klivio. Built for freelancers, by a freelancer.
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── Pricing ── */
+function Pricing() {
+  const free = ["3 proposals/month", "5 invoices/month", "1 client", "Basic templates"]
+  const pro = ["Unlimited proposals", "Unlimited invoices", "Unlimited clients", "Online payments (Razorpay)", "E-signatures", "Priority support"]
+  return (
+    <section id="pricing" className="relative py-28">
+      <div className="mx-auto max-w-5xl px-4">
+        <div className="reveal text-center">
+          <SectionLabel>Pricing</SectionLabel>
+          <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-5xl">
+            Simple pricing, no surprises
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-muted-foreground">
+            Start free. Upgrade when you're ready to scale.
           </p>
         </div>
-      </footer>
-    </div>
+        <div className="mt-16 grid gap-5 md:grid-cols-2">
+          <div className="reveal hairline rounded-2xl bg-surface p-8">
+            <MonoLabel>Free</MonoLabel>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-5xl font-bold tracking-tight">₹0</span>
+              <span className="text-muted-foreground">forever</span>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">For trying things out.</p>
+            <GhostButton href="/login" className="mt-6 w-full">Get started</GhostButton>
+            <ul className="mt-7 space-y-3 text-sm">
+              {free.map((f) => (
+                <li key={f} className="flex items-center gap-3 text-muted-foreground">
+                  <Check size={14} className="text-foreground" /> {f}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="reveal relative rounded-2xl bg-surface p-8 hairline-strong shadow-[0_30px_80px_-20px_rgba(255,255,255,0.08)]">
+            <span className="absolute -top-3 left-8 hairline-strong rounded-full bg-background px-3 py-1 text-[10px] font-mono uppercase tracking-[0.18em] text-foreground">
+              ★ Most popular
+            </span>
+            <MonoLabel>Pro</MonoLabel>
+            <div className="mt-4 flex items-baseline gap-2">
+              <span className="text-5xl font-bold tracking-tight">₹499</span>
+              <span className="text-muted-foreground">/ month</span>
+            </div>
+            <p className="mt-3 text-sm text-muted-foreground">For serious freelancers and agencies.</p>
+            <PrimaryButton href="/login" className="mt-6 w-full">Start free trial</PrimaryButton>
+            <ul className="mt-7 space-y-3 text-sm">
+              {pro.map((f) => (
+                <li key={f} className="flex items-center gap-3 text-foreground">
+                  <Check size={14} /> <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── FAQ ── */
+const FAQS = [
+  { q: "How do I get paid?", a: "You connect your own Razorpay account in Settings. When a client pays an invoice, the money goes directly to your account — Klivio never touches it." },
+  { q: "Can my clients pay via UPI?", a: "Yes. Razorpay supports UPI, cards, net banking, and wallets — covering virtually every payment method used in India." },
+  { q: "Do clients need an account?", a: "No. Clients receive a simple link to view and approve proposals or pay invoices — no signup required on their end." },
+  { q: "Is Klivio mobile friendly?", a: "Yes, the entire dashboard and client-facing pages are fully responsive and work great on phones and tablets." },
+  { q: "Can I cancel anytime?", a: "Yes. There's no lock-in — upgrade, downgrade, or cancel your plan anytime from Settings." },
+]
+
+function FAQ() {
+  const [open, setOpen] = useState<number | null>(0)
+  return (
+    <section id="faq" className="relative py-28">
+      <div className="mx-auto max-w-3xl px-4">
+        <div className="reveal text-center">
+          <SectionLabel>FAQ</SectionLabel>
+          <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-5xl">
+            Questions, answered
+          </h2>
+        </div>
+        <div className="mt-14 space-y-3">
+          {FAQS.map((item, i) => {
+            const isOpen = open === i
+            return (
+              <div key={item.q}
+                className="reveal hairline rounded-2xl bg-surface transition-colors duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-border-strong">
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                >
+                  <span className="text-base font-medium">{item.q}</span>
+                  <span className="hairline-strong grid h-7 w-7 shrink-0 place-items-center rounded-full">
+                    {isOpen ? <Minus size={14} /> : <Plus size={14} />}
+                  </span>
+                </button>
+                <div
+                  className="grid overflow-hidden px-6 transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]"
+                  style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                >
+                  <div className="min-h-0 overflow-hidden">
+                    <p className="pb-5 pr-10 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── Final CTA ── */
+function FinalCTA() {
+  return (
+    <section className="relative overflow-hidden py-32">
+      <div className="cta-glow pointer-events-none absolute inset-0" aria-hidden />
+      <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" aria-hidden />
+      <div className="pulse-dot pointer-events-none absolute left-[20%] top-[30%] h-1 w-1 rounded-full bg-white/60" aria-hidden />
+      <div className="pulse-dot pointer-events-none absolute right-[24%] top-[60%] h-1.5 w-1.5 rounded-full bg-white/40" style={{ animationDelay: "1s" }} aria-hidden />
+      <div className="relative mx-auto max-w-3xl px-4 text-center">
+        <h2 className="reveal text-balance text-4xl font-bold tracking-tight md:text-6xl">
+          Stop chasing clients.
+          <br />
+          <span className="font-serif italic font-medium text-muted-foreground"
+            style={{ fontFamily: "'Instrument Serif', 'Iowan Old Style', Georgia, serif" }}>
+            Start getting paid.
+          </span>
+        </h2>
+        <p className="reveal mx-auto mt-6 max-w-xl text-muted-foreground">
+          Join freelancers who use Klivio to send proposals, invoice clients, and get paid online — all in one place.
+        </p>
+        <div className="reveal mt-9 flex justify-center">
+          <PrimaryButton href="/login" className="px-6 py-3.5 text-base">
+            Get started for free <Send size={15} />
+          </PrimaryButton>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ── Footer ── */
+function Footer() {
+  return (
+    <footer className="border-t border-border">
+      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
+        <div className="flex items-center gap-2.5">
+          <span className="btn-panel grid h-7 w-7 place-items-center rounded-[8px] bg-primary text-primary-foreground">
+            <Zap size={13} strokeWidth={2.5} />
+          </span>
+          <span className="font-bold tracking-tight">Klivio</span>
+        </div>
+        <p className="text-xs text-muted-foreground">
+          © 2026 Klivio. Built for freelancers, by a freelancer.
+        </p>
+      </div>
+    </footer>
+  )
+}
+
+/* ── Page ── */
+export default function LandingPage() {
+  useReveal()
+  return (
+    <main className="relative min-h-screen overflow-x-hidden bg-background text-foreground">
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" />
+      <AmbientBackdrop />
+      <div className="relative z-10">
+        <Navbar />
+        <Hero />
+        <CapabilityStrip />
+        <Features />
+        <HowItWorks />
+        <Why />
+        <Pricing />
+        <FAQ />
+        <FinalCTA />
+        <Footer />
+      </div>
+    </main>
   )
 }

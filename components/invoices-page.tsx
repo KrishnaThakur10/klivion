@@ -167,7 +167,8 @@ export function InvoicesPage({
 }) {
   const router = useRouter()
   const [view, setView] = useState<"list" | "new">("list")
-  const [invoices, setInvoices] = useState(initial)
+  // ── FIXED: use prop directly, no useState for the list ──
+  const invoices = initial
   const [clientId, setClientId] = useState("")
   const [dueDate, setDueDate] = useState("")
   const [taxRate, setTaxRate] = useState("0")
@@ -224,7 +225,7 @@ export function InvoicesPage({
       } else {
         resetForm()
         setView("list")
-        router.refresh()
+        router.refresh() // ── FIXED: re-fetches from DB → new invoice appears
       }
     })
   }
@@ -232,14 +233,14 @@ export function InvoicesPage({
   function handleDelete(id: string) {
     startTransition(async () => {
       await deleteInvoice(id)
-      setInvoices(prev => prev.filter(i => i.id !== id))
+      router.refresh() // ── FIXED: re-fetches → deleted invoice disappears
     })
   }
 
   function handleStatus(id: string, status: string) {
     startTransition(async () => {
       await updateInvoiceStatus(id, status)
-      setInvoices(prev => prev.map(i => i.id === id ? { ...i, status } : i))
+      router.refresh() // ── FIXED: re-fetches → status badge updates
       if (status === "sent") {
         setShareLink(`${window.location.origin}/invoices/${id}`)
         setShowShare(true)

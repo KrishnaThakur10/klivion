@@ -109,7 +109,6 @@
 }
 
 /* ── Magic card hover (cursor-tracked spotlight) ── */
-/* ── Magic card hover (cursor-tracked spotlight) ── */
 .magic-card {
   --mx: 50%;
   --my: 50%;
@@ -125,7 +124,7 @@
   inset: 0;
   z-index: 0;
   border-radius: inherit;
-  pointer-events: none; /* Ensures mouse events pass straight through */
+  pointer-events: none;
   opacity: 0;
   transition: opacity 300ms var(--ease-snap);
   background: radial-gradient(
@@ -137,10 +136,10 @@
   content: '';
   position: absolute;
   inset: 0;
-  z-index: 0;           /* 👈 Changed from 2 to 0 so it sits BEHIND text and buttons */
+  z-index: 2;
   border-radius: inherit;
   padding: 1px;
-  pointer-events: none; /* Ensures mouse events pass straight through */
+  pointer-events: none;
   opacity: 0;
   transition: opacity 300ms var(--ease-snap);
   background: radial-gradient(
@@ -153,8 +152,8 @@
 }
 .magic-card:hover::before,
 .magic-card:hover::after { opacity: 1; }
+.magic-card > * { position: relative; z-index: 1; }
 
-/* 👈 Removed the ".magic-card > *" z-index override rule completely */
 /* ── Scroll reveal ── */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {
@@ -193,42 +192,9 @@
 .ui-input:focus {
   border-color: var(--text-2);
   background: var(--input-bg-focus);
-  box-shadow: 0 0 0 2px var(--focus-ring);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 .ui-input::placeholder { color: var(--text-3); }
-
-/* Remove number input spinners */
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input[type="number"] {
-  -moz-appearance: textfield;
-}
-
-/* Native select dropdown styling */
-.ui-input option {
-  background: var(--bg-grid);
-  color: var(--text);
-}
-
-.ui-input option:checked,
-.ui-input option:hover,
-.ui-input option:focus {
-  background: rgba(255,255,255,0.08) !important;
-  color: var(--text) !important;
-}
-
-select.ui-input {
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  padding-right: 32px;
-}
 
 /* ── Panel glass ── */
 .panel {
@@ -312,3 +278,164 @@ select.ui-input {
 .tiptap mark { background: var(--accent-soft); color: var(--text); border-radius: 3px; padding: 1px 3px; }
 .tiptap strong { font-weight: 700; color: var(--text); }
 .tiptap em { font-style: italic; }
+/* ═══════════════════════════════════════════
+   Landing page tokens (from Lovable design)
+   ═══════════════════════════════════════════ */
+
+/* Surface tokens for landing cards — dark only */
+:root { --surface: #121215; --surface-2: rgba(22,22,26,0.72); --border-strong: rgba(255,255,255,0.14); }
+
+/* Tailwind compat aliases used in landing page */
+.bg-background  { background-color: var(--bg); }
+.bg-surface     { background-color: var(--surface); }
+.text-foreground { color: var(--text); }
+.text-muted-foreground { color: var(--text-2); }
+.border-border  { border-color: var(--hairline); }
+.border-border-strong { border-color: var(--border-strong); }
+.bg-primary     { background-color: var(--accent); }
+.text-primary-foreground { color: var(--accent-on); }
+.bg-muted       { background-color: var(--bg-grid); }
+.bg-border      { background-color: var(--hairline); }
+
+/* btn-panel — white button shadow style */
+.btn-panel {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.6),
+    0 1px 2px rgba(0,0,0,0.4),
+    0 8px 24px -8px rgba(255,255,255,0.25);
+  transition: transform 0.2s var(--ease-apple), opacity 0.2s var(--ease-apple);
+}
+.btn-panel-ghost {
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.2s var(--ease-apple), background-color 0.3s var(--ease-apple);
+}
+
+/* glass — navbar blur */
+.glass {
+  background: var(--surface-2);
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid var(--hairline);
+}
+
+/* hairline borders */
+.hairline       { border: 1px solid var(--hairline); }
+.hairline-strong { border: 1px solid var(--hairline-strong); }
+
+/* mono-label */
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+
+/* Magic card spotlight */
+.magic-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  transition: border-color 0.4s var(--ease-apple);
+}
+.magic-card-inner { position: relative; z-index: 1; }
+.magic-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgba(255,255,255,0.08), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-apple);
+  pointer-events: none;
+  z-index: 0;
+}
+.magic-card:hover::before { opacity: 1; }
+.magic-card:hover { border-color: var(--hairline-strong); }
+
+/* Hero glow */
+.hero-glow {
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255,255,255,0.18), rgba(255,255,255,0.06) 30%, transparent 60%);
+}
+.cta-glow {
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(255,255,255,0.12), transparent 60%);
+}
+
+/* Grid background */
+.grid-bg {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* Floating dashboard tilt animation */
+@keyframes float-y {
+  0%, 100% { transform: perspective(1800px) rotateX(14deg) translateY(0); }
+  50%       { transform: perspective(1800px) rotateX(14deg) translateY(-14px); }
+}
+.float-tilt {
+  animation: float-y 6s var(--ease-apple) infinite;
+  transform-origin: center top;
+}
+
+/* Pulsing dots */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.25); }
+}
+.pulse-dot { animation: pulse-dot 2.4s ease-in-out infinite; }
+
+/* Perspective floor grid */
+.perspective-floor {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 64px 64px;
+  transform: perspective(1000px) rotateX(60deg) translateY(-40px);
+  transform-origin: center top;
+  mask-image: radial-gradient(ellipse 60% 50% at 50% 40%, black 30%, transparent 80%);
+}
+
+/* Ambient orbs */
+.orb {
+  background: radial-gradient(circle, rgba(255,255,255,0.08), transparent 70%);
+  filter: blur(80px);
+  border-radius: 9999px;
+}
+
+/* Vignette */
+.vignette {
+  background: radial-gradient(circle at 50% 50%, transparent 0%, rgba(0,0,0,0.7) 100%);
+}
+
+/* Slow drift */
+@keyframes drift {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0deg); }
+  50%       { transform: translate3d(20px,-30px,0) rotate(180deg); }
+}
+.drift-slow   { animation: drift 22s ease-in-out infinite; }
+.drift-slower { animation: drift 32s ease-in-out infinite reverse; }
+
+/* Wireframe spinning ring */
+@keyframes spin-y {
+  from { transform: perspective(800px) rotateY(0deg) rotateX(70deg); }
+  to   { transform: perspective(800px) rotateY(360deg) rotateX(70deg); }
+}
+.spin-y {
+  animation: spin-y 40s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Reveal on scroll — landing page version */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.9s var(--ease-apple), transform 0.9s var(--ease-apple);
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
