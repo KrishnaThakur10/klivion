@@ -1,6 +1,10 @@
 import { db } from "@/lib/db"
 import { notFound } from "next/navigation"
-import {  PayNowButton } from "@/components/pay-now-button"
+import { PayNowButton } from "@/components/pay-now-button"
+import {
+  Sparkles, CheckCircle2, Clock,
+  AlertCircle, Receipt
+} from "lucide-react"
 
 export default async function PublicInvoicePage(props: {
   params: Promise<{ id: string }>
@@ -18,127 +22,276 @@ export default async function PublicInvoicePage(props: {
     (sum, item) => sum + item.quantity * item.rate, 0
   )
   const tax = invoice.total - subtotal
+  const isPaid = invoice.status === "paid"
+  const isOverdue = invoice.status === "sent" && new Date(invoice.dueDate) < new Date()
+
+  const statusKey = isPaid ? "paid" : isOverdue ? "overdue" : invoice.status
+  const statusMap: Record<string, { label: string; color: string; bg: string; icon: React.ElementType }> = {
+    draft:   { label: "Draft",   color: "#6e6e73", bg: "rgba(255,255,255,0.06)", icon: AlertCircle },
+    sent:    { label: "Sent",    color: "#a1a1a6", bg: "rgba(255,255,255,0.08)", icon: Clock },
+    paid:    { label: "Paid",    color: "#30d158", bg: "rgba(48,209,88,0.14)",   icon: CheckCircle2 },
+    overdue: { label: "Overdue", color: "#ff453a", bg: "rgba(255,69,58,0.14)",   icon: AlertCircle },
+  }
+  const sc = statusMap[statusKey] ?? statusMap.sent
+  const StatusIcon = sc.icon
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-border">
-        <div className="max-w-3xl mx-auto px-6 py-4 flex items-center justify-between">
+    <div
+      className="min-h-screen"
+      style={{
+        background: "var(--bg)",
+        color: "var(--text)",
+        fontFamily: "var(--font-ui)",
+      }}
+    >
+      {/* Nav */}
+      <nav
+        className="sticky top-0 z-10 backdrop-blur-xl"
+        style={{
+          background: "rgba(10,10,12,0.8)",
+          borderBottom: "0.5px solid var(--hairline)",
+        }}
+      >
+        <div className="max-w-3xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground text-xs font-bold">P</span>
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{ background: "#ffffff", boxShadow: "var(--shadow-primary)" }}
+            >
+              <Sparkles className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
-            <span className="font-semibold">Proposely</span>
+            <span className="text-[14px] font-semibold tracking-tight">Klivio</span>
           </div>
-          <span className={`text-xs px-3 py-1 rounded-full font-medium ${
-            invoice.status === "paid" ? "bg-green-100 text-green-700"
-            : invoice.status === "overdue" ? "bg-red-100 text-red-700"
-            : "bg-blue-100 text-blue-700"
-          }`}>
-            {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+
+          <span
+            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
+            style={{
+              background: sc.bg,
+              color: sc.color,
+              border: `0.5px solid ${sc.color}33`,
+              fontFamily: "var(--font-mono)",
+            }}
+          >
+            <StatusIcon className="w-3 h-3" />
+            {sc.label}
           </span>
         </div>
-      </div>
+      </nav>
 
-      <div className="max-w-3xl mx-auto px-6 py-10">
-        {/* Invoice Header */}
-        <div className="bg-white border border-border rounded-2xl p-8 mb-6 shadow-sm">
-          <div className="flex items-start justify-between mb-6">
+      <div className="max-w-3xl mx-auto px-5 md:px-8 py-10 space-y-4">
+
+        {/* Invoice header card */}
+        <div
+          className="rounded-2xl p-6 md:p-8"
+          style={{
+            background: "var(--bg-grid)",
+            border: "0.5px solid var(--hairline)",
+            boxShadow: "var(--shadow-panel)",
+          }}
+        >
+          <div className="flex items-start justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold mb-1">{invoice.number}</h1>
-              <p className="text-sm text-muted-foreground">
-                Issued by <strong className="text-foreground">{invoice.user.name}</strong>
+              <div className="flex items-center gap-3 mb-2">
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center"
+                  style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+                >
+                  <Receipt className="w-4 h-4" style={{ color: "var(--text-3)" }} strokeWidth={1.5} />
+                </div>
+                <h1
+                  className="text-[22px] md:text-[26px] font-bold tracking-tight"
+                  style={{ color: "var(--text)", letterSpacing: "-0.02em", fontFamily: "var(--font-mono)" }}
+                >
+                  {invoice.number}
+                </h1>
+              </div>
+              <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
+                Issued by{" "}
+                <span className="font-medium" style={{ color: "var(--text-2)" }}>
+                  {invoice.user.name}
+                </span>
               </p>
               {invoice.client && (
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Billed to <strong className="text-foreground">{invoice.client.name}</strong>
+                <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
+                  Billed to{" "}
+                  <span className="font-medium" style={{ color: "var(--text-2)" }}>
+                    {invoice.client.name}
+                  </span>
                 </p>
               )}
             </div>
-            <div className="text-right">
-              <p className="text-sm text-muted-foreground">Due Date</p>
-              <p className="font-semibold">
+            <div className="text-right shrink-0">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-wider mb-1"
+                style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
+              >
+                Due Date
+              </p>
+              <p
+                className="text-[14px] font-semibold"
+                style={{ color: isOverdue ? "var(--status-error)" : "var(--text)" }}
+              >
                 {new Date(invoice.dueDate).toLocaleDateString("en-IN", {
-                  day: "numeric", month: "long", year: "numeric"
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
                 })}
               </p>
             </div>
           </div>
 
-          {/* Line Items Table */}
-          <table className="w-full mb-6">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left text-xs text-muted-foreground font-medium pb-2">Description</th>
-                <th className="text-right text-xs text-muted-foreground font-medium pb-2">Qty</th>
-                <th className="text-right text-xs text-muted-foreground font-medium pb-2">Rate</th>
-                <th className="text-right text-xs text-muted-foreground font-medium pb-2">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {invoice.lineItems.map((item) => (
-                <tr key={item.id} className="border-b border-border/50">
-                  <td className="py-3 text-sm">{item.description}</td>
-                  <td className="py-3 text-sm text-right">{item.quantity}</td>
-                  <td className="py-3 text-sm text-right">
-                    ₹{item.rate.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </td>
-                  <td className="py-3 text-sm text-right font-medium">
-                    ₹{(item.quantity * item.rate).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Line items table */}
+          <div
+            className="rounded-xl overflow-hidden mb-5"
+            style={{ border: "0.5px solid var(--hairline)" }}
+          >
+            {/* Table header */}
+            <div
+              className="grid px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
+              style={{
+                gridTemplateColumns: "1fr 60px 100px 100px",
+                background: "var(--inset-fill)",
+                color: "var(--text-3)",
+                fontFamily: "var(--font-mono)",
+                borderBottom: "0.5px solid var(--hairline)",
+              }}
+            >
+              <span>Description</span>
+              <span className="text-right">Qty</span>
+              <span className="text-right">Rate</span>
+              <span className="text-right">Amount</span>
+            </div>
+
+            {invoice.lineItems.map((item, i) => (
+              <div
+                key={item.id}
+                className="grid items-center px-4 py-3"
+                style={{
+                  gridTemplateColumns: "1fr 60px 100px 100px",
+                  borderBottom:
+                    i < invoice.lineItems.length - 1
+                      ? "0.5px solid rgba(255,255,255,0.04)"
+                      : "none",
+                }}
+              >
+                <span className="text-[13px]" style={{ color: "var(--text)" }}>
+                  {item.description}
+                </span>
+                <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
+                  {item.quantity}
+                </span>
+                <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
+                  ₹{item.rate.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
+                <span
+                  className="text-[13px] font-medium text-right"
+                  style={{ color: "var(--text)" }}
+                >
+                  ₹{(item.quantity * item.rate).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            ))}
+          </div>
 
           {/* Totals */}
           <div className="flex justify-end">
-            <div className="w-56 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span>₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+            <div className="w-60 space-y-2">
+              <div className="flex justify-between text-[13px]">
+                <span style={{ color: "var(--text-3)" }}>Subtotal</span>
+                <span style={{ color: "var(--text-2)" }}>
+                  ₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
               </div>
               {tax > 0 && (
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Tax</span>
-                  <span>₹{tax.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                <div className="flex justify-between text-[13px]">
+                  <span style={{ color: "var(--text-3)" }}>Tax</span>
+                  <span style={{ color: "var(--text-2)" }}>
+                    ₹{tax.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </span>
                 </div>
               )}
-              <div className="flex justify-between font-bold text-lg border-t border-border pt-2">
-                <span>Total Due</span>
-                <span>₹{invoice.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+              <div
+                className="flex justify-between items-center pt-2"
+                style={{ borderTop: "0.5px solid var(--hairline)" }}
+              >
+                <span className="text-[14px] font-semibold" style={{ color: "var(--text)" }}>
+                  Total Due
+                </span>
+                <span
+                  className="text-[20px] font-bold"
+                  style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
+                >
+                  ₹{invoice.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Pay Now / Paid */}
-        {invoice.status === "paid" ? (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-8 text-center shadow-sm">
-            <div className="text-3xl mb-2">✅</div>
-            <h2 className="font-semibold text-green-800 text-lg">Invoice Paid</h2>
-            <p className="text-sm text-green-700 mt-1">Thank you for your payment!</p>
+        {/* Pay / Paid section */}
+        {isPaid ? (
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{
+              background: "var(--status-success-bg)",
+              border: "0.5px solid rgba(48,209,88,0.25)",
+            }}
+          >
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4"
+              style={{ background: "rgba(48,209,88,0.2)" }}
+            >
+              <CheckCircle2 className="w-7 h-7" style={{ color: "var(--status-success)" }} />
+            </div>
+            <h2
+              className="text-[18px] font-semibold mb-1"
+              style={{ color: "var(--status-success)" }}
+            >
+              Invoice Paid
+            </h2>
+            <p className="text-[13px]" style={{ color: "rgba(48,209,88,0.7)" }}>
+              Thank you for your payment!
+            </p>
           </div>
         ) : (
-          <div className="bg-white border border-border rounded-2xl p-8 shadow-sm text-center">
-            <h2 className="font-semibold text-lg mb-1">Pay This Invoice</h2>
-            <p className="text-sm text-muted-foreground mb-6">
-              Total amount due: <strong className="text-foreground text-base">
+          <div
+            className="rounded-2xl p-6 md:p-8 text-center"
+            style={{
+              background: "var(--bg-grid)",
+              border: "0.5px solid var(--hairline-strong)",
+              boxShadow: "var(--shadow-panel)",
+            }}
+          >
+            <h2
+              className="text-[16px] font-semibold mb-1"
+              style={{ color: "var(--text)" }}
+            >
+              Pay This Invoice
+            </h2>
+            <p className="text-[13px] mb-6" style={{ color: "var(--text-3)" }}>
+              Total amount due:{" "}
+              <span className="font-bold text-[15px]" style={{ color: "var(--text)" }}>
                 ₹{invoice.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-              </strong>
+              </span>
             </p>
-            <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium opacity-60 cursor-not-allowed">
-              <PayNowButton
-                invoiceId={invoice.id}
-                amount={invoice.total}
-                invoiceNumber={invoice.number}
-                />
-            </div>
-            <p className="text-xs text-muted-foreground mt-3">
-              Online payment coming soon. Please contact the sender for payment details.
+            <PayNowButton
+              invoiceId={invoice.id}
+              amount={invoice.total}
+              invoiceNumber={invoice.number}
+            />
+            <p className="text-[11px] mt-4" style={{ color: "var(--text-3)" }}>
+              🔒 Secured by Razorpay · UPI, Cards, Net Banking accepted
             </p>
           </div>
         )}
+
+        {/* Footer */}
+        <p
+          className="text-center text-[11px] pb-6"
+          style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
+        >
+          Powered by Klivio · Secure proposal & payment platform
+        </p>
       </div>
     </div>
   )

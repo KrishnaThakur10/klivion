@@ -12,8 +12,9 @@ import {
   Plus, ArrowLeft, Trash2, Send,
   CheckCircle2, Clock, AlertCircle,
   FileText, Copy, Check, ExternalLink,
-  MoreHorizontal, Link as LinkIcon
+  MoreHorizontal, Link as LinkIcon, Sparkles 
 } from "lucide-react"
+import { AIProposalGenerator } from "@/components/ai-proposal-generator"
 
 type Client = { id: string; name: string }
 type Proposal = {
@@ -187,6 +188,8 @@ export function ProposalsPage({
   const [shareLink, setShareLink] = useState("")
   const [showShare, setShowShare] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [showAI, setShowAI] = useState(false)
+  const [aiBusinessName, setAiBusinessName] = useState("")
 
   function handleCreate() {
     if (!title.trim()) { setError("Title is required"); return }
@@ -236,28 +239,33 @@ export function ProposalsPage({
   if (view === "new") {
     return (
       <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
-        <header
-          className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
-          style={{ borderBottom: "0.5px solid var(--hairline)" }}
+      <header
+        className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
+        style={{ borderBottom: "0.5px solid var(--hairline)" }}
+      >
+        <button
+          onClick={() => setView("list")}
+          className="flex items-center gap-2 text-[13px] font-medium transition-colors"
+          style={{ color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+          onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
+          onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
         >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          Proposals
+        </button>
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setView("list")}
-            className="flex items-center gap-2 text-[13px] font-medium transition-colors"
-            style={{ color: "var(--text-3)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
-            onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
-            onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
+            onClick={() => setShowAI(true)}
+            className="btn-ghost text-[13px] flex items-center gap-1.5"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Proposals
+            <Sparkles className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">AI Generate</span>
           </button>
-          <button
-            onClick={handleCreate}
-            disabled={isPending}
-            className="btn-primary"
-          >
+          <button onClick={handleCreate} disabled={isPending} className="btn-primary">
             {isPending ? "Saving..." : "Save Proposal"}
           </button>
-        </header>
+        </div>
+      </header>
 
         <div className="flex-1 p-4 md:p-8 max-w-215 w-full mx-auto space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -305,12 +313,23 @@ export function ProposalsPage({
               Content
             </label>
             <TiptapEditor
-              content=""
+              content={content}
               onChange={html => setContent(html)}
               placeholder="Write your proposal here..."
             />
           </div>
         </div>
+        {showAI && (
+            <AIProposalGenerator
+              onGenerated={(html) => {
+                setContent(html)
+                setShowAI(false)
+              }}
+              onClose={() => setShowAI(false)}
+              userName={""} // pass from session if available
+              businessName={""}
+            />
+          )}
       </div>
     )
   }

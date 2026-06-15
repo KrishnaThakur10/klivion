@@ -13,7 +13,7 @@ import Superscript from "@tiptap/extension-superscript"
 import CharacterCount from "@tiptap/extension-character-count"
 import TaskList from "@tiptap/extension-task-list"
 import TaskItem from "@tiptap/extension-task-item"
-import { useState, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
   Highlighter, Link as LinkIcon, Link2Off, List, ListOrdered,
@@ -421,6 +421,8 @@ export default function TiptapEditor({
   placeholder = "Start writing your proposal...",
   minHeight = "400px",
 }: TiptapProps) {
+  const lastExternalContent = useRef(content) // ← add this
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -450,17 +452,29 @@ export default function TiptapEditor({
     },
   })
 
+  // Only inject content when it genuinely changes from outside
+  // (e.g. AI generation) — not on every keystroke
+  useEffect(() => {
+    if (
+      editor &&
+      content !== undefined &&
+      content !== lastExternalContent.current // only if truly new external content
+    ) {
+      lastExternalContent.current = content
+      editor.commands.setContent(content) // false = don't emit update event
+    }
+  }, [content, editor])
+
   const charCount = editor?.storage.characterCount.characters() ?? 0
   const wordCount = editor?.storage.characterCount.words() ?? 0
 
-  if(!editor) { return null }
+  if (!editor) { return null }
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="border border-border rounded-xl overflow-hidden bg-background shadow-sm">
         <Toolbar editor={editor} />
         <SelectionMenu editor={editor} />
-
-        {/* Editor area */}
         <div
           className="px-6 py-4 cursor-text"
           style={{ minHeight }}
@@ -468,8 +482,6 @@ export default function TiptapEditor({
         >
           <EditorContent editor={editor} />
         </div>
-
-        {/* Footer — word/char count */}
         <div className="flex items-center justify-end gap-4 px-4 py-2 border-t border-border bg-muted/10">
           <span className="text-xs text-muted-foreground">{wordCount} words</span>
           <span className="text-xs text-muted-foreground">{charCount} characters</span>
