@@ -2,6 +2,7 @@ import { db } from "@/lib/db"
 import { notFound } from "next/navigation"
 import { ApproveButton } from "@/components/approve-button"
 import { Sparkles, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { PDFDownloadButton } from "@/components/pdf-download-button"
 
 export default async function PublicProposalPage(props: {
   params: Promise<{ token: string }>
@@ -53,77 +54,84 @@ export default async function PublicProposalPage(props: {
             </div>
             <span className="text-[14px] font-semibold tracking-tight">Klivio</span>
           </div>
-
-          <span
-            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
-            style={{
-              background: sc.bg,
-              color: sc.color,
-              border: `0.5px solid ${sc.color}33`,
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            <StatusIcon className="w-3 h-3" />
-            {sc.label}
-          </span>
+          <div className="flex items-center gap-3">
+              <PDFDownloadButton
+                targetId={`proposal-${proposal.id}`}
+                filename={`${proposal.title.replace(/\s+/g, "-")}.pdf`}
+                label="Download PDF"
+              />
+              <span
+                className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
+                style={{
+                  background: sc.bg,
+                  color: sc.color,
+                  border: `0.5px solid ${sc.color}33`,
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                <StatusIcon className="w-3 h-3" />
+                {sc.label}
+              </span>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto px-5 md:px-8 py-10 space-y-4">
-
-        {/* Proposal meta card */}
-        <div
-          className="rounded-2xl p-6 md:p-8"
-          style={{
-            background: "var(--bg-grid)",
-            border: "0.5px solid var(--hairline)",
-            boxShadow: "var(--shadow-panel)",
-          }}
-        >
-          <h1
-            className="text-[22px] md:text-[28px] font-bold tracking-tight mb-3"
-            style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
+        <div id={`proposal-${proposal.id}`}> 
+          {/* Proposal meta card */}
+          <div
+            className="rounded-2xl p-6 md:p-8"
+            style={{
+              background: "var(--bg-grid)",
+              border: "0.5px solid var(--hairline)",
+              boxShadow: "var(--shadow-panel)",
+            }}
           >
-            {proposal.title}
-          </h1>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px]" style={{ color: "var(--text-3)" }}>
-            <span>
-              From:{" "}
-              <span className="font-medium" style={{ color: "var(--text-2)" }}>
-                {proposal.user.name}
-              </span>
-            </span>
-            {proposal.client && (
+            <h1
+              className="text-[22px] md:text-[28px] font-bold tracking-tight mb-3"
+              style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
+            >
+              {proposal.title}
+            </h1>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px]" style={{ color: "var(--text-3)" }}>
               <span>
-                To:{" "}
+                From:{" "}
                 <span className="font-medium" style={{ color: "var(--text-2)" }}>
-                  {proposal.client.name}
+                  {proposal.user.name}
                 </span>
               </span>
-            )}
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}>
-              {new Date(proposal.createdAt).toLocaleDateString("en-IN", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
-            </span>
+              {proposal.client && (
+                <span>
+                  To:{" "}
+                  <span className="font-medium" style={{ color: "var(--text-2)" }}>
+                    {proposal.client.name}
+                  </span>
+                </span>
+              )}
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}>
+                {new Date(proposal.createdAt).toLocaleDateString("en-IN", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+            </div>
           </div>
-        </div>
 
-        {/* Proposal content */}
-        <div
-          className="rounded-2xl p-6 md:p-10"
-          style={{
-            background: "var(--bg-grid)",
-            border: "0.5px solid var(--hairline)",
-            boxShadow: "var(--shadow-panel)",
-          }}
-        >
+          {/* Proposal content */}
           <div
-            className="tiptap"
-            dangerouslySetInnerHTML={{ __html: proposal.content }}
-          />
+            className="rounded-2xl p-6 md:p-10"
+            style={{
+              background: "var(--bg-grid)",
+              border: "0.5px solid var(--hairline)",
+              boxShadow: "var(--shadow-panel)",
+            }}
+          >
+            <div
+              className="tiptap"
+              dangerouslySetInnerHTML={{ __html: proposal.content }}
+            />
+          </div>
         </div>
 
         {/* Sign / Signed section */}

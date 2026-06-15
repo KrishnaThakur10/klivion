@@ -1,6 +1,7 @@
 import { db } from "@/lib/db"
 import { notFound } from "next/navigation"
 import { PayNowButton } from "@/components/pay-now-button"
+import { PDFDownloadButton } from "@/components/pdf-download-button"
 import {
   Sparkles, CheckCircle2, Clock,
   AlertCircle, Receipt
@@ -62,167 +63,171 @@ export default async function PublicInvoicePage(props: {
             </div>
             <span className="text-[14px] font-semibold tracking-tight">Klivio</span>
           </div>
-
-          <span
-            className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
-            style={{
-              background: sc.bg,
-              color: sc.color,
-              border: `0.5px solid ${sc.color}33`,
-              fontFamily: "var(--font-mono)",
-            }}
-          >
-            <StatusIcon className="w-3 h-3" />
-            {sc.label}
-          </span>
+          <div className="flex items-center gap-4">
+            <PDFDownloadButton targetId={`invoice-${invoice.id}`} filename={`${invoice.number}.pdf`} label="Download PDF" />
+            <span
+              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
+              style={{
+                background: sc.bg,
+                color: sc.color,
+                border: `0.5px solid ${sc.color}33`,
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              <StatusIcon className="w-3 h-3" />
+              {sc.label}
+            </span>
+          </div>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto px-5 md:px-8 py-10 space-y-4">
 
         {/* Invoice header card */}
-        <div
-          className="rounded-2xl p-6 md:p-8"
-          style={{
-            background: "var(--bg-grid)",
-            border: "0.5px solid var(--hairline)",
-            boxShadow: "var(--shadow-panel)",
-          }}
-        >
-          <div className="flex items-start justify-between gap-4 mb-6">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
-                >
-                  <Receipt className="w-4 h-4" style={{ color: "var(--text-3)" }} strokeWidth={1.5} />
+        <div  id={`invoice-${invoice.id}`}>
+          <div
+            className="rounded-2xl p-6 md:p-8"
+            style={{
+              background: "var(--bg-grid)",
+              border: "0.5px solid var(--hairline)",
+              boxShadow: "var(--shadow-panel)",
+            }}
+          >
+            <div className="flex items-start justify-between gap-4 mb-6">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center"
+                    style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+                  >
+                    <Receipt className="w-4 h-4" style={{ color: "var(--text-3)" }} strokeWidth={1.5} />
+                  </div>
+                  <h1
+                    className="text-[22px] md:text-[26px] font-bold tracking-tight"
+                    style={{ color: "var(--text)", letterSpacing: "-0.02em", fontFamily: "var(--font-mono)" }}
+                  >
+                    {invoice.number}
+                  </h1>
                 </div>
-                <h1
-                  className="text-[22px] md:text-[26px] font-bold tracking-tight"
-                  style={{ color: "var(--text)", letterSpacing: "-0.02em", fontFamily: "var(--font-mono)" }}
-                >
-                  {invoice.number}
-                </h1>
-              </div>
-              <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
-                Issued by{" "}
-                <span className="font-medium" style={{ color: "var(--text-2)" }}>
-                  {invoice.user.name}
-                </span>
-              </p>
-              {invoice.client && (
                 <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
-                  Billed to{" "}
+                  Issued by{" "}
                   <span className="font-medium" style={{ color: "var(--text-2)" }}>
-                    {invoice.client.name}
+                    {invoice.user.name}
                   </span>
                 </p>
-              )}
+                {invoice.client && (
+                  <p className="text-[13px]" style={{ color: "var(--text-3)" }}>
+                    Billed to{" "}
+                    <span className="font-medium" style={{ color: "var(--text-2)" }}>
+                      {invoice.client.name}
+                    </span>
+                  </p>
+                )}
+              </div>
+              <div className="text-right shrink-0">
+                <p
+                  className="text-[10px] font-semibold uppercase tracking-wider mb-1"
+                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
+                >
+                  Due Date
+                </p>
+                <p
+                  className="text-[14px] font-semibold"
+                  style={{ color: isOverdue ? "var(--status-error)" : "var(--text)" }}
+                >
+                  {new Date(invoice.dueDate).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="text-right shrink-0">
-              <p
-                className="text-[10px] font-semibold uppercase tracking-wider mb-1"
-                style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
-              >
-                Due Date
-              </p>
-              <p
-                className="text-[14px] font-semibold"
-                style={{ color: isOverdue ? "var(--status-error)" : "var(--text)" }}
-              >
-                {new Date(invoice.dueDate).toLocaleDateString("en-IN", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </p>
-            </div>
-          </div>
 
-          {/* Line items table */}
-          <div
-            className="rounded-xl overflow-hidden mb-5"
-            style={{ border: "0.5px solid var(--hairline)" }}
-          >
-            {/* Table header */}
+            {/* Line items table */}
             <div
-              className="grid px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
-              style={{
-                gridTemplateColumns: "1fr 60px 100px 100px",
-                background: "var(--inset-fill)",
-                color: "var(--text-3)",
-                fontFamily: "var(--font-mono)",
-                borderBottom: "0.5px solid var(--hairline)",
-              }}
+              className="rounded-xl overflow-hidden mb-5"
+              style={{ border: "0.5px solid var(--hairline)" }}
             >
-              <span>Description</span>
-              <span className="text-right">Qty</span>
-              <span className="text-right">Rate</span>
-              <span className="text-right">Amount</span>
-            </div>
-
-            {invoice.lineItems.map((item, i) => (
+              {/* Table header */}
               <div
-                key={item.id}
-                className="grid items-center px-4 py-3"
+                className="grid px-4 py-2.5 text-[10px] font-semibold uppercase tracking-wider"
                 style={{
                   gridTemplateColumns: "1fr 60px 100px 100px",
-                  borderBottom:
-                    i < invoice.lineItems.length - 1
-                      ? "0.5px solid rgba(255,255,255,0.04)"
-                      : "none",
+                  background: "var(--inset-fill)",
+                  color: "var(--text-3)",
+                  fontFamily: "var(--font-mono)",
+                  borderBottom: "0.5px solid var(--hairline)",
                 }}
               >
-                <span className="text-[13px]" style={{ color: "var(--text)" }}>
-                  {item.description}
-                </span>
-                <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
-                  {item.quantity}
-                </span>
-                <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
-                  ₹{item.rate.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                </span>
-                <span
-                  className="text-[13px] font-medium text-right"
-                  style={{ color: "var(--text)" }}
-                >
-                  ₹{(item.quantity * item.rate).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                </span>
+                <span>Description</span>
+                <span className="text-right">Qty</span>
+                <span className="text-right">Rate</span>
+                <span className="text-right">Amount</span>
               </div>
-            ))}
-          </div>
 
-          {/* Totals */}
-          <div className="flex justify-end">
-            <div className="w-60 space-y-2">
-              <div className="flex justify-between text-[13px]">
-                <span style={{ color: "var(--text-3)" }}>Subtotal</span>
-                <span style={{ color: "var(--text-2)" }}>
-                  ₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-              {tax > 0 && (
-                <div className="flex justify-between text-[13px]">
-                  <span style={{ color: "var(--text-3)" }}>Tax</span>
-                  <span style={{ color: "var(--text-2)" }}>
-                    ₹{tax.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+              {invoice.lineItems.map((item, i) => (
+                <div
+                  key={item.id}
+                  className="grid items-center px-4 py-3"
+                  style={{
+                    gridTemplateColumns: "1fr 60px 100px 100px",
+                    borderBottom:
+                      i < invoice.lineItems.length - 1
+                        ? "0.5px solid rgba(255,255,255,0.04)"
+                        : "none",
+                  }}
+                >
+                  <span className="text-[13px]" style={{ color: "var(--text)" }}>
+                    {item.description}
+                  </span>
+                  <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
+                    {item.quantity}
+                  </span>
+                  <span className="text-[12px] text-right" style={{ color: "var(--text-2)" }}>
+                    ₹{item.rate.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </span>
+                  <span
+                    className="text-[13px] font-medium text-right"
+                    style={{ color: "var(--text)" }}
+                  >
+                    ₹{(item.quantity * item.rate).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-              )}
-              <div
-                className="flex justify-between items-center pt-2"
-                style={{ borderTop: "0.5px solid var(--hairline)" }}
-              >
-                <span className="text-[14px] font-semibold" style={{ color: "var(--text)" }}>
-                  Total Due
-                </span>
-                <span
-                  className="text-[20px] font-bold"
-                  style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
+              ))}
+            </div>
+
+            {/* Totals */}
+            <div className="flex justify-end">
+              <div className="w-60 space-y-2">
+                <div className="flex justify-between text-[13px]">
+                  <span style={{ color: "var(--text-3)" }}>Subtotal</span>
+                  <span style={{ color: "var(--text-2)" }}>
+                    ₹{subtotal.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                {tax > 0 && (
+                  <div className="flex justify-between text-[13px]">
+                    <span style={{ color: "var(--text-3)" }}>Tax</span>
+                    <span style={{ color: "var(--text-2)" }}>
+                      ₹{tax.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                )}
+                <div
+                  className="flex justify-between items-center pt-2"
+                  style={{ borderTop: "0.5px solid var(--hairline)" }}
                 >
-                  ₹{invoice.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
-                </span>
+                  <span className="text-[14px] font-semibold" style={{ color: "var(--text)" }}>
+                    Total Due
+                  </span>
+                  <span
+                    className="text-[20px] font-bold"
+                    style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
+                  >
+                    ₹{invoice.total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

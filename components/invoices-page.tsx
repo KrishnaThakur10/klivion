@@ -11,7 +11,8 @@ import {
   Plus, ArrowLeft, Trash2, Send,
   CheckCircle2, Clock, AlertCircle,
   Receipt, Copy, Check, ExternalLink,
-  MoreHorizontal, Link as LinkIcon, X
+  MoreHorizontal, Link as LinkIcon, X,
+  Download
 } from "lucide-react"
 
 type Client = { id: string; name: string }
@@ -139,6 +140,18 @@ function InvoiceMenu({
                 Copy link
               </button>
             )}
+
+            <button
+              onClick={() => {
+                window.open(`/invoices/${invoice.id}`, '_blank')
+                setOpen(false)
+              }}
+              className="flex items-center gap-2.5 w-full px-3 py-2 text-[13px] transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+              style={{ color: "var(--text-2)" }}
+            >
+              <Download className="w-3.5 h-3.5 shrink-0" />
+              View & Download PDF
+            </button>
 
             <div style={{ height: "0.5px", background: "var(--hairline)", margin: "4px 0" }} />
 
