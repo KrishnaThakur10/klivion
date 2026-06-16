@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { ClientsPage } from "@/components/clients-page"
+import type { Client } from "@prisma/client"
 
 export default async function Page() {
   const session = await auth()
@@ -13,7 +14,7 @@ export default async function Page() {
 
   return (
     <ClientsPage
-      clients={clients.map(c => ({
+      clients={clients.map((c: Client) => ({
         id: c.id,
         name: c.name,
         email: c.email,
