@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import { db } from "@/lib/db"
+import { resend } from "@/lib/resend"
+import { paymentReceivedEmail } from "@/lib/email-templates"
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,6 +58,27 @@ export async function POST(req: NextRequest) {
         razorpayPaymentId: razorpay_payment_id,
       },
     })
+    const updatedInvoice = await db.invoice.findFirst({
+      where: { id: invoiceId },
+      include: { user: true, client: true },
+    })
+
+    if (updatedInvoice?.user?.email) {
+      const { subject, html } = paymentReceivedEmail({
+        invoiceNumber: updatedInvoice.number,
+        freelancerName: updatedInvoice.user.name ?? "",
+        freelancerEmail: updatedInvoice.user.email,
+        clientName: updatedInvoice.client?.name ?? "Your client",
+        amount: updatedInvoice.total,
+      })
+
+      await resend.emails.send({
+        from: "Klivio <notifications@klivio.app>",
+        to: updatedInvoice.user.email,
+        subject,
+        html,
+      })
+    }
 
     console.log(`Invoice ${invoice.number} paid successfully via Razorpay`)
 
