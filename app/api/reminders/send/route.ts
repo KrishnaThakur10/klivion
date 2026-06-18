@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { resend } from "@/lib/resend"
+import { sendEmail } from "@/lib/email"
 import { invoiceReminderEmail } from "@/lib/email-templates"
 
 // This route is called by a cron job daily
@@ -67,11 +67,9 @@ export async function GET(req: NextRequest) {
     })
 
     try {
-      await resend.emails.send({
-        // from: "Klivio <reminders@klivio.app>",  // change to your domain later
-        // to: invoice.client.email,
-        from: "onboarding@resend.dev",  // change to your domain later
-        to: "kthakur99100@gmail.com", // change to invoice.client.email later
+      await sendEmail({
+        to: invoice.client.email,
+        toName: invoice.client.name,
         subject,
         html,
       })

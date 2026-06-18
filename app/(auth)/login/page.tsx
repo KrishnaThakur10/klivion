@@ -12,7 +12,7 @@ export default function LoginPage() {
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
             <span className="text-primary-foreground text-xl font-bold">K</span>
           </div>
-          <h1 className="text-2xl font-bold">Welcome to Klivio</h1>
+          <h1 className="text-2xl font-bold">Welcome to Klivion</h1>
           <p className="text-muted-foreground mt-2 text-sm">
             Sign in to manage your proposals and invoices
           </p>
@@ -27,7 +27,7 @@ export default function LoginPage() {
         >
           <button
             type="submit"
-            className="w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg px-4 py-3 font-medium"
+            className="w-full flex items-center justify-center gap-3 cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90 transition-colors rounded-lg px-4 py-3 font-medium"
           >
             <Image src="/github.svg" alt="GitHub" width={20} height={20} />
             Continue with GitHub

@@ -52,7 +52,7 @@ export default async function PublicProposalPage(props: {
             >
               <Sparkles className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
-            <span className="text-[14px] font-semibold tracking-tight">Klivio</span>
+            <span className="text-[14px] font-semibold tracking-tight">Klivion</span>
           </div>
           <div className="flex items-center gap-3">
               <PDFDownloadButton
@@ -190,7 +190,7 @@ export default async function PublicProposalPage(props: {
           className="text-center text-[11px] pb-6"
           style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
         >
-          Powered by Klivio · Secure proposal & payment platform
+          Powered by Klivion · Secure proposal & payment platform
         </p>
       </div>
     </div>

@@ -43,7 +43,7 @@ export function MobileSidebar({
             <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
           </div>
           <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>
-            Klivio
+            Klivion
           </span>
         </div>
         <button
@@ -88,7 +88,7 @@ export function MobileSidebar({
               <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
             <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>
-              Klivio
+              Klivion
             </span>
           </div>
           <button

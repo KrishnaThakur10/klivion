@@ -115,7 +115,7 @@ function Navbar() {
             <span className="btn-panel grid h-8 w-8 shrink-0 place-items-center rounded-[9px] bg-primary text-primary-foreground">
               <Zap size={16} strokeWidth={2.5} />
             </span>
-            <span className="truncate font-bold tracking-tight">Klivio</span>
+            <span className="truncate font-bold tracking-tight">Klivion</span>
           </a>
 
           {/* Desktop links */}
@@ -251,7 +251,7 @@ function Hero() {
               <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-b from-white/10 to-transparent opacity-60" aria-hidden />
               <img
                 src="/dashboard-mockup.png"
-                alt="Klivio dashboard showing earnings, proposals, and invoices"
+                alt="Klivion dashboard showing earnings, proposals, and invoices"
                 width={1536}
                 height={1024}
                 className="relative w-full rounded-xl"
@@ -383,7 +383,7 @@ function HowItWorks() {
   )
 }
 
-/* ── Why Klivio ── */
+/* ── Why Klivion ── */
 const USPS = [
   { icon: Wallet, title: "Your money, your account", desc: "Payments go directly to your own Razorpay account. We never touch your client's money." },
   { icon: Smartphone, title: "Mobile-first design", desc: "Manage proposals and invoices from your phone. Fully responsive on every device." },
@@ -396,7 +396,7 @@ function Why() {
     <section className="relative py-28">
       <div className="mx-auto max-w-6xl px-4">
         <div className="reveal text-center">
-          <SectionLabel>Why Klivio</SectionLabel>
+          <SectionLabel>Why Klivion</SectionLabel>
           <h2 className="mt-6 text-balance text-4xl font-bold tracking-tight md:text-5xl">
             Built different from the rest
           </h2>
@@ -483,10 +483,10 @@ function Pricing() {
 
 /* ── FAQ ── */
 const FAQS = [
-  { q: "How do I get paid?", a: "You connect your own Razorpay account in Settings. When a client pays an invoice, the money goes directly to your account — Klivio never touches it." },
+  { q: "How do I get paid?", a: "You connect your own Razorpay account in Settings. When a client pays an invoice, the money goes directly to your account — Klivion never touches it." },
   { q: "Can my clients pay via UPI?", a: "Yes. Razorpay supports UPI, cards, net banking, and wallets — covering virtually every payment method used in India." },
   { q: "Do clients need an account?", a: "No. Clients receive a simple link to view and approve proposals or pay invoices — no signup required on their end." },
-  { q: "Is Klivio mobile friendly?", a: "Yes, the entire dashboard and client-facing pages are fully responsive and work great on phones and tablets." },
+  { q: "Is Klivion mobile friendly?", a: "Yes, the entire dashboard and client-facing pages are fully responsive and work great on phones and tablets." },
   { q: "Can I cancel anytime?", a: "Yes. There's no lock-in — upgrade, downgrade, or cancel your plan anytime from Settings." },
 ]
 
@@ -551,7 +551,7 @@ function FinalCTA() {
           </span>
         </h2>
         <p className="reveal mx-auto mt-6 max-w-xl text-muted-foreground">
-          Join freelancers who use Klivio to send proposals, invoice clients, and get paid online — all in one place.
+          Join freelancers who use Klivion to send proposals, invoice clients, and get paid online — all in one place.
         </p>
         <div className="reveal mt-9 flex justify-center">
           <PrimaryButton href="/login" className="px-6 py-3.5 text-base">
@@ -572,10 +572,10 @@ function Footer() {
           <span className="btn-panel grid h-7 w-7 place-items-center rounded-[8px] bg-primary text-primary-foreground">
             <Zap size={13} strokeWidth={2.5} />
           </span>
-          <span className="font-bold tracking-tight">Klivio</span>
+          <span className="font-bold tracking-tight">Klivion</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          © 2026 Klivio. Built for freelancers, by a freelancer.
+          © 2026 Klivion. Built for freelancers, by a freelancer.
         </p>
       </div>
     </footer>

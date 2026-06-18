@@ -56,7 +56,7 @@ export function invoiceReminderEmail({
                           <span style="font-size:14px;">✦</span>
                         </td>
                         <td style="padding-left:10px;">
-                          <span style="color:#f5f5f7;font-size:16px;font-weight:700;letter-spacing:-0.3px;">Klivio</span>
+                          <span style="color:#f5f5f7;font-size:16px;font-weight:700;letter-spacing:-0.3px;">Klivion</span>
                         </td>
                       </tr>
                     </table>
@@ -175,7 +175,7 @@ export function paymentReceivedEmail({
         <table width="600" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
           <tr>
             <td style="background:#0a0a0c;padding:24px 32px;">
-              <span style="color:#f5f5f7;font-size:16px;font-weight:700;">✦ Klivio</span>
+              <span style="color:#f5f5f7;font-size:16px;font-weight:700;">✦ Klivion</span>
             </td>
           </tr>
           <tr>
@@ -192,7 +192,7 @@ export function paymentReceivedEmail({
           </tr>
           <tr>
             <td style="background:#f5f5f7;padding:16px 32px;border-top:1px solid #e5e5e5;">
-              <p style="margin:0;font-size:12px;color:#a1a1a6;text-align:center;">Sent via <strong style="color:#6e6e73;">Klivio</strong></p>
+              <p style="margin:0;font-size:12px;color:#a1a1a6;text-align:center;">Sent via <strong style="color:#6e6e73;">Klivion</strong></p>
             </td>
           </tr>
         </table>

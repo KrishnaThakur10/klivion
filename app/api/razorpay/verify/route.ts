@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import { db } from "@/lib/db"
-import { resend } from "@/lib/resend"
+import { sendEmail } from "@/lib/email"
 import { paymentReceivedEmail } from "@/lib/email-templates"
 
 export async function POST(req: NextRequest) {
@@ -72,9 +72,9 @@ export async function POST(req: NextRequest) {
         amount: updatedInvoice.total,
       })
 
-      await resend.emails.send({
-        from: "Klivio <notifications@klivio.app>",
+      await sendEmail({
         to: updatedInvoice.user.email,
+        toName: updatedInvoice.user.name ?? "",
         subject,
         html,
       })

@@ -70,7 +70,7 @@ export function Sidebar({
             className="text-[13px] font-semibold tracking-tight"
             style={{ color: "#f5f5f7" }}
           >
-            Klivio
+            Klivion
           </span>
         </div>
       </div>

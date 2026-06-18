@@ -3,7 +3,7 @@ import "./globals.css"
 import Script from "next/script"
 
 export const metadata: Metadata = {
-  title: "Klivio — Proposals & Invoices for Freelancers",
+  title: "Klivion — Proposals & Invoices for Freelancers",
   description: "Create professional proposals and get paid faster.",
 }
 
@@ -22,7 +22,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased ">
         {children}
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
