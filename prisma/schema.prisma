@@ -96,7 +96,6 @@ model Invoice {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   client    Client?    @relation(fields: [clientId], references: [id])
   lineItems LineItem[]
-  emailLogs  EmailLog[]
 }
 
 model LineItem {
@@ -122,13 +121,4 @@ model UserSettings {
   updatedAt       DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model EmailLog {
-  id             String   @id @default(cuid())
-  invoiceId      String
-  reminderNumber Int
-  sentAt         DateTime @default(now())
-
-  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }

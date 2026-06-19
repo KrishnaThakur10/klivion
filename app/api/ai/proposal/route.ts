@@ -17,7 +17,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Project type and client name are required" }, { status: 400 })
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash" })
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash",
+      generationConfig: {
+        maxOutputTokens: 1500 // Restricts token usage per request so your free quota lasts longer
+       }
+     })
 
     const prompt = `You are an expert freelance proposal writer. Write a professional, compelling proposal in HTML format.
 
@@ -59,8 +64,17 @@ Make it sound human, warm, confident and professional. Avoid generic filler. Tai
       .trim()
 
     return NextResponse.json({ success: true, content: cleaned })
-  } catch (error) {
+  } catch (error: any) {
     console.error("Gemini API error:", error)
+
+    // Check if it's a service overload
+    if (error?.status === 503 || error?.message?.includes("503")) {
+      return NextResponse.json(
+        { error: "AI service is busy right now. Please try again in 30 seconds." },
+        { status: 503 }
+      )
+    }
+
     return NextResponse.json(
       { error: "Failed to generate proposal. Please try again." },
       { status: 500 }

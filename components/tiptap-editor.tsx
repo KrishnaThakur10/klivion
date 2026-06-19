@@ -139,8 +139,6 @@ function HeadingDropdown({ editor }: { editor: ReturnType<typeof useEditor> }) {
   )
 }
 
-// ── Color Picker ───────────────────────────────────
-
 // ── Link Dialog ────────────────────────────────────
 function LinkButton({ editor }: { editor: ReturnType<typeof useEditor> }) {
   const [linkUrl, setLinkUrl] = useState("")
@@ -421,7 +419,8 @@ export default function TiptapEditor({
   placeholder = "Start writing your proposal...",
   minHeight = "400px",
 }: TiptapProps) {
-  const lastExternalContent = useRef(content) // ← add this
+  const lastExternalContent = useRef(content)
+  const isInternalChange = useRef(false)  // ← ADD THIS
 
   const editor = useEditor({
     extensions: [
@@ -448,27 +447,26 @@ export default function TiptapEditor({
       },
     },
     onUpdate: ({ editor }) => {
+      isInternalChange.current = true  // ← MARK AS INTERNAL
       onChange?.(editor.getHTML())
     },
   })
 
-  // Only inject content when it genuinely changes from outside
-  // (e.g. AI generation) — not on every keystroke
   useEffect(() => {
-    if (
-      editor &&
-      content !== undefined &&
-      content !== lastExternalContent.current // only if truly new external content
-    ) {
+    if (isInternalChange.current) {  // ← SKIP IF INTERNAL
+      isInternalChange.current = false
+      return
+    }
+    if (editor && content !== undefined && content !== lastExternalContent.current) {
       lastExternalContent.current = content
-      editor.commands.setContent(content) // false = don't emit update event
+      editor.commands.setContent(content)
     }
   }, [content, editor])
 
   const charCount = editor?.storage.characterCount.characters() ?? 0
   const wordCount = editor?.storage.characterCount.words() ?? 0
 
-  if (!editor) { return null }
+  if (!editor) return null
 
   return (
     <TooltipProvider delayDuration={300}>
