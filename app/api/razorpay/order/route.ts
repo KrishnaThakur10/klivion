@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import Razorpay from "razorpay"
 import { db } from "@/lib/db"
+import { getPlanFeatures } from "@/lib/plans"
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,19 +33,41 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Get the FREELANCER's own Razorpay keys from their settings
+    // Check if the freelancer's plan allows payments
+    const user = await db.user.findUnique({
+      where: { id: invoice.userId },
+      select: { plan: true },
+    })
+
+    const features = getPlanFeatures(user?.plan ?? "free")
+
+    if (!features.payments) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Online payments require a Pro plan. Upgrade to start accepting payments.",
+          limitReached: true,
+        },
+        { status: 403 }
+      )
+    }
+
+    // Get the freelancer's own Razorpay keys from their settings
     const settings = await db.userSettings.findUnique({
       where: { userId: invoice.userId },
     })
 
     if (!settings?.razorpayKeyId || !settings?.razorpaySecret) {
       return NextResponse.json(
-        { success: false, error: "Freelancer has not connected Razorpay yet" },
+        {
+          success: false,
+          error: "Razorpay is not connected. Please add your Razorpay keys in Settings.",
+        },
         { status: 400 }
       )
     }
 
-    // Use the FREELANCER'S keys — money goes to them directly
+    // Use the freelancer's keys — money goes directly to them
     const razorpay = new Razorpay({
       key_id: settings.razorpayKeyId,
       key_secret: settings.razorpaySecret,
@@ -74,7 +97,7 @@ export async function POST(req: NextRequest) {
       data: { razorpayOrderId: order.id },
     })
 
-    // Return the freelancer's KEY ID to the frontend (public key, safe to send)
+    // Return freelancer's public key ID to the frontend — safe to expose
     return NextResponse.json({
       success: true,
       order: {
@@ -87,7 +110,7 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error("Razorpay order creation error:", error)
     return NextResponse.json(
-      { success: false, error: "Failed to create payment order" },
+      { success: false, error: "Failed to create payment order. Please try again." },
       { status: 500 }
     )
   }

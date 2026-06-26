@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { auth } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { getPlanFeatures } from "@/lib/plans"
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
 
@@ -11,6 +14,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const user = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { plan: true }
+    })
+
+    const features = getPlanFeatures(user?.plan ?? "free")
+
+    if (!features.aiProposals) {
+      return NextResponse.json(
+        { error: "AI proposal generation is a Pro feature. Upgrade to unlock it.", limitReached: true },
+        { status: 403 }
+      )
+    }
+
     const { projectType, clientName, budget, deadline, description, yourName, yourBusiness } = await req.json()
 
     if (!projectType || !clientName) {
@@ -18,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
       generationConfig: {
         maxOutputTokens: 1500 // Restricts token usage per request so your free quota lasts longer
        }

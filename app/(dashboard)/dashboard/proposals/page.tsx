@@ -18,6 +18,11 @@ export default async function Page() {
     }),
   ])
 
+  const user = await db.user.findUnique({
+  where: { id: session.user.id },
+  select: { plan: true }
+  })
+
   return (
     <ProposalsPage
       proposals={proposals.map(p => ({
@@ -29,6 +34,7 @@ export default async function Page() {
         clientName: p.client?.name ?? null,
       }))}
       clients={clients.map(c => ({ id: c.id, name: c.name }))}
+      userPlan={user?.plan ?? "free"}
     />
   )
 }

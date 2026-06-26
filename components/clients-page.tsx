@@ -7,6 +7,7 @@ import {
   Plus, ArrowLeft, Trash2, Users,
   Mail, Building2, Phone, MoreHorizontal
 } from "lucide-react"
+import { UpgradeModal } from "@/components/upgrade-modal"
 
 type Client = {
   id: string
@@ -71,6 +72,8 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
   const [phone, setPhone] = useState("")
   const [error, setError] = useState("")
   const [isPending, startTransition] = useTransition()
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState("")
 
   function resetForm() {
     setName("")
@@ -90,6 +93,11 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
         company: company || undefined,
         phone: phone || undefined,
       })
+      if (result?.limitReached) {
+      setUpgradeReason(result.error ?? "")
+      setShowUpgrade(true)
+      return
+      }
       if (result?.error) {
         setError(result.error)
       } else {
@@ -111,6 +119,12 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
   if (view === "new") {
     return (
       <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
+        {showUpgrade && (
+          <UpgradeModal
+            reason={upgradeReason}
+            onClose={() => setShowUpgrade(false)}
+          />
+        )}
         <header
           className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
           style={{ borderBottom: "0.5px solid var(--hairline)" }}
@@ -199,6 +213,12 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
   // ── LIST VIEW ──
   return (
     <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
+      {showUpgrade && (
+        <UpgradeModal
+          reason={upgradeReason}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
       <header
         className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
         style={{ borderBottom: "0.5px solid var(--hairline)" }}

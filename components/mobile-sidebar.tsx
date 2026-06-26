@@ -5,8 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
-  Users, Settings, Sparkles, Menu, X
+  Users, Settings, Sparkles, Menu, X, Zap
 } from "lucide-react"
+import { PLANS } from "@/lib/plans"
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -20,13 +21,19 @@ export function MobileSidebar({
   userName,
   userEmail,
   userImage,
+  plan = "free",
+  counts = { proposals: 0, invoices: 0, clients: 0 },
 }: {
   userName: string
   userEmail: string
   userImage: string | null
+  plan?: string
+  counts?: { proposals: number; invoices: number; clients: number }
 }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const isPro = plan === "pro"
+  const freeLimits = PLANS.free.limits
 
   return (
     <>
@@ -35,17 +42,13 @@ export function MobileSidebar({
         className="h-14 flex items-center justify-between px-4"
         style={{ borderBottom: "0.5px solid rgba(255,255,255,0.08)", background: "#0a0a0c" }}
       >
-        <div className="flex items-center gap-2">
-          <div
-            className="w-6 h-6 rounded-lg flex items-center justify-center"
-            style={{ background: "#ffffff" }}
-          >
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+            style={{ background: "#ffffff" }}>
             <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
           </div>
-          <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>
-            Klivion
-          </span>
-        </div>
+          <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>Klivion</span>
+        </Link>
         <button
           onClick={() => setOpen(true)}
           className="w-8 h-8 flex items-center justify-center rounded-lg transition-colors hover:bg-[rgba(255,255,255,0.06)]"
@@ -72,7 +75,6 @@ export function MobileSidebar({
           borderRight: "0.5px solid rgba(255,255,255,0.08)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
           boxShadow: open ? "var(--shadow-panel)" : "none",
-          pointerEvents: open ? "auto" : "none",
         }}
       >
         {/* Drawer header */}
@@ -80,17 +82,13 @@ export function MobileSidebar({
           className="h-14 flex items-center justify-between px-4 shrink-0"
           style={{ borderBottom: "0.5px solid rgba(255,255,255,0.08)" }}
         >
-          <div className="flex items-center gap-2">
-            <div
-              className="w-6 h-6 rounded-lg flex items-center justify-center"
-              style={{ background: "#ffffff" }}
-            >
+          <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center"
+              style={{ background: "#ffffff" }}>
               <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
-            <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>
-              Klivion
-            </span>
-          </div>
+            <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>Klivion</span>
+          </Link>
           <button
             onClick={() => setOpen(false)}
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[rgba(255,255,255,0.06)]"
@@ -101,7 +99,7 @@ export function MobileSidebar({
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto">
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -124,12 +122,72 @@ export function MobileSidebar({
           })}
         </nav>
 
+        {/* Plan section */}
+        <div className="px-3 pb-2">
+          {isPro ? (
+            <div
+              className="rounded-xl px-3 py-2.5 flex items-center gap-2"
+              style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+            >
+              <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--status-warning)" }} />
+              <div>
+                <p className="text-[11px] font-semibold" style={{ color: "var(--text-2)" }}>Pro Plan</p>
+                <p className="text-[10px]" style={{ color: "var(--text-3)" }}>Increased limits active</p>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="rounded-xl p-3"
+              style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-semibold uppercase tracking-wider"
+                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                  Free Plan
+                </p>
+                <Link
+                  href="/dashboard/settings?upgrade=true"
+                  onClick={() => setOpen(false)}
+                  className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.08)", color: "var(--text-2)" }}
+                >
+                  Upgrade
+                </Link>
+              </div>
+              {[
+                { label: "Proposals", used: counts.proposals, limit: freeLimits.proposals },
+                { label: "Invoices",  used: counts.invoices,  limit: freeLimits.invoices },
+                { label: "Clients",   used: counts.clients,   limit: freeLimits.clients },
+              ].map(item => (
+                <div key={item.label} className="mb-2 last:mb-0">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-[10px]" style={{ color: "var(--text-3)" }}>{item.label}</span>
+                    <span className="text-[10px]"
+                      style={{ color: item.used >= item.limit ? "var(--status-error)" : "var(--text-3)" }}>
+                      {item.used}/{item.limit}
+                    </span>
+                  </div>
+                  <div className="h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.06)" }}>
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min((item.used / item.limit) * 100, 100)}%`,
+                        background: item.used >= item.limit ? "var(--status-error)" : "rgba(255,255,255,0.3)",
+                      }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* User */}
         <div
-          className="px-2 pb-4 pt-3 shrink-0"
+          className="px-3 pb-4 pt-2 shrink-0"
           style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}
         >
-          <div className="flex items-center gap-3 px-3 py-2">
+          <div className="flex items-center gap-3 px-1 py-2">
             {userImage ? (
               <img src={userImage} alt={userName}
                 className="w-7 h-7 rounded-full object-cover shrink-0" />
@@ -146,7 +204,7 @@ export function MobileSidebar({
                 {userName}
               </p>
               <p className="text-[11px] truncate mt-0.5" style={{ color: "#6e6e73" }}>
-                Free plan
+                {isPro ? "Pro plan" : "Free plan"}
               </p>
             </div>
           </div>

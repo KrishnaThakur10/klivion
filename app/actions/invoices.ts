@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { getPlanLimits, getMonthStart } from "@/lib/plans"
 
 const LineItemSchema = z.object({
   description: z.string().min(1),
@@ -26,6 +27,33 @@ export async function createInvoice(data: {
 }) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true },
+  })
+
+  if (!user) throw new Error("User not found")
+
+  const limits = getPlanLimits(user.plan)
+
+  // Count invoices created THIS month only
+  const monthStart = getMonthStart()
+  const invoicesThisMonth = await db.invoice.count({
+    where: {
+      userId: session.user.id,
+      createdAt: { gte: monthStart },
+    },
+  })
+
+  if (invoicesThisMonth >= limits.invoicesPerMonth) {
+    return {
+      error: user.plan === "free"
+        ? `You've used all ${limits.invoicesPerMonth} invoices for this month. Upgrade to Pro for unlimited invoices.`
+        : `You've reached the monthly invoice limit. Please contact support.`,
+      limitReached: true,
+    }
+  }
 
   const validated = InvoiceSchema.safeParse(data)
   if (!validated.success) {

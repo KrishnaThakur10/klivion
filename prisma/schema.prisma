@@ -9,19 +9,17 @@ datasource db {
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String    @unique
+  email         String?   @unique
   emailVerified DateTime?
   image         String?
   plan          String    @default("free")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts  Account[]
-  sessions  Session[]
-  clients   Client[]
-  proposals Proposal[]
-  invoices  Invoice[]
-  settings  UserSettings?
+  planUpdatedAt DateTime?
+  accounts      Account[]
+  sessions      Session[]
+  clients       Client[]
+  proposals     Proposal[]
+  invoices      Invoice[]
+  settings      UserSettings?
 }
 
 model Account {

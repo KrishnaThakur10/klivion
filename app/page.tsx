@@ -425,8 +425,8 @@ function Why() {
 
 /* ── Pricing ── */
 function Pricing() {
-  const free = ["3 proposals/month", "5 invoices/month", "1 client", "Basic templates"]
-  const pro = ["Unlimited proposals", "Unlimited invoices", "Unlimited clients", "Online payments (Razorpay)", "E-signatures", "Priority support"]
+  const free = ["3 proposals/month", "5 invoices/month", "2 clients", "Basic templates"]
+  const pro = ["500 proposals/month", "1,000 invoices/month", "200 clients", "Online payments (Razorpay)", "AI proposal generation", "Priority support"]
   return (
     <section id="pricing" className="relative py-28">
       <div className="mx-auto max-w-5xl px-4">

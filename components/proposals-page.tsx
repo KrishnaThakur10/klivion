@@ -15,6 +15,7 @@ import {
   MoreHorizontal, Link as LinkIcon, Sparkles 
 } from "lucide-react"
 import { AIProposalGenerator } from "@/components/ai-proposal-generator"
+import { UpgradeModal } from "@/components/upgrade-modal"
 
 type Client = { id: string; name: string }
 type Proposal = {
@@ -173,10 +174,13 @@ function ProposalMenu({
 export function ProposalsPage({
   proposals: initial,
   clients,
+  userPlan,
 }: {
   proposals: Proposal[]
   clients: Client[]
+  userPlan: string
 }) {
+  const isPro = userPlan === "pro"
   const router = useRouter()
   const [view, setView] = useState<"list" | "new">("list")
   // Use props directly — router.refresh() causes Server Component to re-render with fresh DB data
@@ -190,27 +194,34 @@ export function ProposalsPage({
   const [isPending, startTransition] = useTransition()
   const [showAI, setShowAI] = useState(false)
   const [aiBusinessName, setAiBusinessName] = useState("")
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState("")
 
-  function handleCreate() {
-    if (!title.trim()) { setError("Title is required"); return }
-    setError("")
-    startTransition(async () => {
-      const result = await createProposal({
-        title,
-        clientId: clientId || undefined,
-        content,
-      })
-      if (result?.error) {
-        setError(result.error)
-      } else {
-        setTitle("")
-        setClientId("")
-        setContent("")
-        setView("list")
-        router.refresh() // re-fetches server data → new proposal appears in list
-      }
+function handleCreate() {
+  if (!title.trim()) { setError("Title is required"); return }
+  setError("")
+  startTransition(async () => {
+    const result = await createProposal({
+      title,
+      clientId: clientId || undefined,
+      content,
     })
-  }
+    if (result?.limitReached) {
+      setUpgradeReason(result.error ?? "")
+      setShowUpgrade(true)
+      return
+    }
+    if (result?.error) {
+      setError(result.error)
+    } else {
+      setTitle("")
+      setClientId("")
+      setContent("")
+      setView("list")
+      router.refresh()
+    }
+  })
+}
 
   function handleDelete(id: string) {
     startTransition(async () => {
@@ -239,6 +250,12 @@ export function ProposalsPage({
   if (view === "new") {
     return (
       <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
+        {showUpgrade && (
+          <UpgradeModal
+            reason={upgradeReason}
+            onClose={() => setShowUpgrade(false)}
+          />
+        )}
       <header
         className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
         style={{ borderBottom: "0.5px solid var(--hairline)" }}
@@ -255,11 +272,26 @@ export function ProposalsPage({
         </button>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowAI(true)}
+            onClick={() => {
+              if (!isPro) {
+                setUpgradeReason("AI proposal generation is a Pro feature. Upgrade to unlock it.")
+                setShowUpgrade(true)
+                return
+              }
+              setShowAI(true)
+            }}
             className="btn-ghost text-[13px] flex items-center gap-1.5"
           >
             <Sparkles className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">AI Generate</span>
+            {!isPro && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 rounded-full"
+                style={{ background: "rgba(255,159,10,0.15)", color: "var(--status-warning)" }}
+              >
+                PRO
+              </span>
+            )}
           </button>
           <button onClick={handleCreate} disabled={isPending} className="btn-primary">
             {isPending ? "Saving..." : "Save Proposal"}
@@ -319,6 +351,12 @@ export function ProposalsPage({
             />
           </div>
         </div>
+        {showUpgrade && (
+          <UpgradeModal
+            reason={upgradeReason}
+            onClose={() => setShowUpgrade(false)}
+          />
+        )}
         {showAI && (
             <AIProposalGenerator
               onGenerated={(html) => {
@@ -337,7 +375,12 @@ export function ProposalsPage({
   // ── LIST VIEW ──
   return (
     <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
-
+      {showUpgrade && (
+        <UpgradeModal
+          reason={upgradeReason}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
       {/* Share modal */}
       {showShare && (
         <div

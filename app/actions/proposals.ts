@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { getPlanLimits, getMonthStart } from "@/lib/plans"
 
 const ProposalSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -18,6 +19,33 @@ export async function createProposal(data: {
 }) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { plan: true },
+  })
+
+  if (!user) throw new Error("User not found")
+
+  const limits = getPlanLimits(user.plan)
+
+  // Count proposals created THIS month only
+  const monthStart = getMonthStart()
+  const proposalsThisMonth = await db.proposal.count({
+    where: {
+      userId: session.user.id,
+      createdAt: { gte: monthStart },
+    },
+  })
+
+  if (proposalsThisMonth >= limits.proposalsPerMonth) {
+    return {
+      error: user.plan === "free"
+        ? `You've used all ${limits.proposalsPerMonth} proposals for this month. Upgrade to Pro for unlimited proposals.`
+        : `You've reached the monthly proposal limit. Please contact support.`,
+      limitReached: true,
+    }
+  }
 
   const validated = ProposalSchema.safeParse(data)
   if (!validated.success) {

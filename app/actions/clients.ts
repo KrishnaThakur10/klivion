@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { getPlanLimits } from "@/lib/plans"
 
 const ClientSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,6 +21,28 @@ export async function createClient(data: {
 }) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      plan: true,
+      _count: { select: { clients: true } },
+    },
+  })
+
+  if (!user) throw new Error("User not found")
+
+  const limits = getPlanLimits(user.plan)
+
+  // Clients = total limit, not monthly
+  if (user._count.clients >= limits.clientsTotal) {
+    return {
+      error: user.plan === "free"
+        ? `You've reached the limit of ${limits.clientsTotal} clients on the free plan. Upgrade to Pro for unlimited clients.`
+        : `You've reached the client limit. Please contact support.`,
+      limitReached: true,
+    }
+  }     
 
   const validated = ClientSchema.safeParse(data)
   if (!validated.success) {

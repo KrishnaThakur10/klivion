@@ -14,6 +14,7 @@ import {
   MoreHorizontal, Link as LinkIcon, X,
   Download
 } from "lucide-react"
+import { UpgradeModal } from "@/components/upgrade-modal"
 
 type Client = { id: string; name: string }
 type LineItem = { id: string; description: string; quantity: number; rate: number }
@@ -192,6 +193,8 @@ export function InvoicesPage({
   const [shareLink, setShareLink] = useState("")
   const [showShare, setShowShare] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [showUpgrade, setShowUpgrade] = useState(false)
+  const [upgradeReason, setUpgradeReason] = useState("")
 
   const subtotal = lineItems.reduce((sum, item) =>
     sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0), 0)
@@ -233,6 +236,11 @@ export function InvoicesPage({
           rate: parseFloat(item.rate) || 0,
         })),
       })
+      if (result?.limitReached) {
+      setUpgradeReason(result.error ?? "")
+      setShowUpgrade(true)
+      return
+      }
       if (result?.error) {
         setError(result.error)
       } else {
@@ -270,6 +278,12 @@ export function InvoicesPage({
   if (view === "new") {
     return (
       <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
+        {showUpgrade && (
+          <UpgradeModal
+            reason={upgradeReason}
+            onClose={() => setShowUpgrade(false)}
+          />
+        )}
         <header
           className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
           style={{ borderBottom: "0.5px solid var(--hairline)" }}
@@ -451,6 +465,13 @@ export function InvoicesPage({
 
   return (
     <div className="flex flex-col min-h-full" style={{ background: "var(--bg)" }}>
+      
+      {showUpgrade && (
+        <UpgradeModal
+          reason={upgradeReason}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
 
       {/* Share modal */}
       {showShare && (
