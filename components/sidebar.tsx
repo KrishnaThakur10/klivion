@@ -1,10 +1,11 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
-  Users, Settings, Zap
+  Users, Settings, Zap, LogOut
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PLANS } from "@/lib/plans"
@@ -46,6 +47,16 @@ export function Sidebar({
   const freeLimits = PLANS.free.limits
   const proLimits = PLANS.pro.limits
   const limits = isPro ? proLimits : freeLimits
+  const [showMenu, setShowMenu] = useState(false)
+  const [isPending, startTransition] = useTransition()
+
+  // Inline server action call via fetch — avoids needing a separate actions file
+  function handleLogout() {
+    startTransition(async () => {
+      await fetch("/api/auth/signout", { method: "POST" })
+      window.location.href = "/"
+    })
+  }
 
   return (
     <aside
@@ -184,14 +195,79 @@ export function Sidebar({
         )}
       </div>
 
-      {/* User */}
+      {/* User + Logout */}
       <div
         className="px-2 pt-2 pb-3 shrink-0"
-        style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}
+        style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)", position: "relative" }}
       >
-        <Link
-          href="/dashboard/settings"
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg transition-all duration-150 hover:bg-[rgba(255,255,255,0.04)]"
+        {/* Popup menu */}
+        {showMenu && (
+          <>
+            {/* Backdrop */}
+            <div
+              style={{ position: "fixed", inset: 0, zIndex: 10 }}
+              onClick={() => setShowMenu(false)}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: "calc(100% - 4px)",
+                left: "8px",
+                right: "8px",
+                zIndex: 20,
+                background: "#1c1c1f",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "10px",
+                padding: "4px",
+                boxShadow: "0 -8px 32px -8px rgba(0,0,0,0.6)",
+              }}
+            >
+              {/* Name + email */}
+              <div
+                style={{
+                  padding: "10px 10px 8px",
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  marginBottom: "4px",
+                }}
+              >
+                <p className="text-[12px] font-medium truncate" style={{ color: "#f5f5f7" }}>
+                  {userName}
+                </p>
+                <p className="text-[11px] truncate mt-0.5" style={{ color: "#6e6e73" }}>
+                  {userEmail}
+                </p>
+              </div>
+
+              {/* Settings */}
+              <Link
+                href="/dashboard/settings"
+                onClick={() => setShowMenu(false)}
+                className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg transition-colors hover:bg-[rgba(255,255,255,0.05)]"
+              >
+                <Settings className="w-3.5 h-3.5 shrink-0" style={{ color: "#6e6e73" }} />
+                <span className="text-[13px]" style={{ color: "#a1a1a6" }}>Settings</span>
+              </Link>
+
+              {/* Sign out */}
+              <button
+                onClick={handleLogout}
+                disabled={isPending}
+                className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg cursor-pointer transition-colors hover:bg-[rgba(255,69,58,0.08)] text-left"
+              >
+                <LogOut className="w-3.5 h-3.5 shrink-0" style={{ color: "#ff453a" }} />
+                <span className="text-[13px]" style={{ color: "#ff453a" }}>
+                  {isPending ? "Signing out..." : "Sign out"}
+                </span>
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* User row */}
+        <button
+          onClick={() => setShowMenu(s => !s)}
+          className="flex items-center gap-2.5 w-full px-2.5 py-2 rounded-lg transition-all duration-150 hover:bg-[rgba(255,255,255,0.04)] text-left"
+          style={showMenu ? { background: "rgba(255,255,255,0.04)" } : {}}
         >
           {userImage ? (
             <img
@@ -216,7 +292,8 @@ export function Sidebar({
               {isPro ? "Pro plan" : "Free plan"}
             </p>
           </div>
-        </Link>
+          <LogOut className="w-3 h-3 shrink-0" style={{ color: "#6e6e73" }} />
+        </button>
       </div>
     </aside>
   )

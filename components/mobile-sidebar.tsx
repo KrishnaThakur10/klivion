@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
-  Users, Settings, Menu, X, Zap
+  Users, Settings, Menu, X, Zap, LogOut
 } from "lucide-react"
 import { PLANS } from "@/lib/plans"
 
@@ -34,6 +34,14 @@ export function MobileSidebar({
   const pathname = usePathname()
   const isPro = plan === "pro"
   const freeLimits = PLANS.free.limits
+  const [isPending, startTransition] = useTransition()
+
+  function handleLogout() {
+    startTransition(async () => {
+      await fetch("/api/auth/signout", { method: "POST" })
+      window.location.href = "/"
+    })
+  }
 
   return (
     <>
@@ -182,15 +190,18 @@ export function MobileSidebar({
           )}
         </div>
 
-        {/* User */}
+        {/* User + Logout — only this section changed */}
         <div
           className="px-3 pb-4 pt-2 shrink-0"
           style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}
         >
+          {/* User info */}
           <div className="flex items-center gap-3 px-1 py-2">
             {userImage ? (
               <img src={userImage} alt={userName}
-                className="w-7 h-7 rounded-full object-cover shrink-0" />
+                className="w-7 h-7 rounded-full object-cover shrink-0"
+                style={{ border: "0.5px solid rgba(255,255,255,0.14)" }}
+              />
             ) : (
               <div
                 className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
@@ -208,6 +219,23 @@ export function MobileSidebar({
               </p>
             </div>
           </div>
+
+          {/* Sign out button */}
+          <button
+            onClick={handleLogout}
+            disabled={isPending}
+            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors text-left"
+            style={{
+              background: "rgba(255,69,58,0.06)",
+              border: "0.5px solid rgba(255,69,58,0.12)",
+              opacity: isPending ? 0.6 : 1,
+            }}
+          >
+            <LogOut className="w-3.5 h-3.5 shrink-0" style={{ color: "#ff453a" }} />
+            <span className="text-[13px] font-medium" style={{ color: "#ff453a" }}>
+              {isPending ? "Signing out..." : "Sign out"}
+            </span>
+          </button>
         </div>
       </div>
     </>
