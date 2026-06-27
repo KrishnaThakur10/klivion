@@ -49,7 +49,7 @@ const sections = [
       },
       {
         subtitle: "Account Termination",
-        text: "We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or abuse the service. You may request account deletion by emailing klivion@gmail.com.",
+        text: "We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or abuse the service. You may request account deletion by emailing klivion.support@gmail.com.",
       },
     ],
   },
@@ -66,7 +66,7 @@ const sections = [
       },
       {
         subtitle: "Billing",
-        text: "Pro plan upgrades are currently processed manually via a Razorpay payment link. Upon successful payment, send proof of payment to klivion@gmail.com and your account will be upgraded within 24 hours.",
+        text: "Pro plan upgrades are currently processed manually via a Razorpay payment link. Upon successful payment, send proof of payment to klivion.support@gmail.com and your account will be upgraded within 24 hours.",
       },
       {
         subtitle: "No Automatic Renewals",
@@ -238,7 +238,7 @@ export default function TermsPage() {
               lineHeight: 1.1,
             }}
           >
-            Terms of Service
+            Terms of Service 
           </h1>
           <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "15px", color: "#a1a1a6", lineHeight: 1.6 }}>
             Last updated: June 2026. By using Klivion, you agree to these terms. Please read them carefully.
@@ -257,8 +257,8 @@ export default function TermsPage() {
         >
           <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "14px", color: "#a1a1a6", margin: 0 }}>
             Questions or concerns?{" "}
-            <a href="mailto:klivion@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
-              klivion@gmail.com
+            <a href="mailto:klivion.support@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
+              klivion.support@gmail.com
             </a>
           </p>
         </div>

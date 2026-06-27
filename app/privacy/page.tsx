@@ -83,7 +83,7 @@ const sections = [
       },
       {
         subtitle: "Account Deletion",
-        text: "To delete your account and all associated data, email us at klivion@gmail.com. We will process deletion requests within 30 days.",
+        text: "To delete your account and all associated data, email us at klivion.support@gmail.com. We will process deletion requests within 30 days.",
       },
     ],
   },
@@ -113,7 +113,7 @@ const sections = [
       },
       {
         subtitle: "Deletion",
-        text: "Email klivion@gmail.com to request deletion of your account and all associated data.",
+        text: "Email klivion.support@gmail.com to request deletion of your account and all associated data.",
       },
     ],
   },
@@ -227,8 +227,8 @@ export default function PrivacyPage() {
         >
           <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "14px", color: "#a1a1a6", margin: 0 }}>
             Questions about this policy?{" "}
-            <a href="mailto:klivion@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
-              klivion@gmail.com
+            <a href="mailto:klivion.support@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
+              klivion.support@gmail.com
             </a>
           </p>
         </div>

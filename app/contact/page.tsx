@@ -116,8 +116,8 @@ export default function ContactPage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              <a href="mailto:klivion@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none" }}>
-                klivion@gmail.com
+              <a href="mailto:klivion.support@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none" }}>
+                klivion.support@gmail.com
               </a>
             </p>
             <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", margin: 0 }}>
@@ -159,8 +159,8 @@ export default function ContactPage() {
                 letterSpacing: "-0.02em",
               }}
             >
-              <a href="mailto:klivion@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none" }}>
-                klivion@gmail.com
+              <a href="mailto:klivion.support@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none" }}>
+                klivion.support@gmail.com
               </a>
             </p>
             <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", margin: 0 }}>
@@ -259,7 +259,7 @@ export default function ContactPage() {
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
             {[
               ["Product", "Klivion"],
-              ["Email", "klivion@gmail.com"],
+              ["Email", "klivion.support@gmail.com"],
               ["Country", "India"],
             ].map(([key, val]) => (
               <div key={key} style={{ display: "flex", gap: "16px" }}>

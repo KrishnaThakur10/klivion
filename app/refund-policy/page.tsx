@@ -20,7 +20,7 @@ const sections = [
     content: [
       {
         subtitle: "Manual Billing",
-        text: "Pro plan upgrades are currently processed manually. You pay ₹499 via a Razorpay payment link and then send proof of payment to klivion@gmail.com. Your account is upgraded within 24 hours of confirmation.",
+        text: "Pro plan upgrades are currently processed manually. You pay ₹499 via a Razorpay payment link and then send proof of payment to klivion.support@gmail.com. Your account is upgraded within 24 hours of confirmation.",
       },
       {
         subtitle: "No Automatic Renewals",
@@ -33,7 +33,7 @@ const sections = [
     content: [
       {
         subtitle: "7-Day Refund Window",
-        text: "If you are not satisfied with your Pro plan upgrade, you may request a full refund within 7 days of payment. Email klivion@gmail.com with your payment reference number and the email address associated with your account.",
+        text: "If you are not satisfied with your Pro plan upgrade, you may request a full refund within 7 days of payment. Email klivion.support@gmail.com with your payment reference number and the email address associated with your account.",
       },
       {
         subtitle: "Refund Processing",
@@ -58,11 +58,11 @@ const sections = [
     content: [
       {
         subtitle: "Cancelling Your Pro Plan",
-        text: "Since billing is manual, there is nothing to 'cancel' in the traditional sense — your Pro access simply does not renew unless you pay again. If you want your account downgraded to Free before your current Pro period ends, email klivion@gmail.com.",
+        text: "Since billing is manual, there is nothing to 'cancel' in the traditional sense — your Pro access simply does not renew unless you pay again. If you want your account downgraded to Free before your current Pro period ends, email klivion.support@gmail.com.",
       },
       {
         subtitle: "Account Deletion",
-        text: "To delete your Klivion account entirely, email klivion@gmail.com. Account deletion is permanent and cannot be undone. All your proposals, invoices, and client data will be removed from our database within 30 days.",
+        text: "To delete your Klivion account entirely, email klivion.support@gmail.com. Account deletion is permanent and cannot be undone. All your proposals, invoices, and client data will be removed from our database within 30 days.",
       },
     ],
   },
@@ -88,7 +88,7 @@ const sections = [
     content: [
       {
         subtitle: "Contact Us Immediately",
-        text: "If you believe you have been charged incorrectly or made a duplicate payment, email klivion@gmail.com immediately with your payment reference. We will investigate and, if confirmed, issue a full refund regardless of the 7-day window.",
+        text: "If you believe you have been charged incorrectly or made a duplicate payment, email klivion.support@gmail.com immediately with your payment reference. We will investigate and, if confirmed, issue a full refund regardless of the 7-day window.",
       },
     ],
   },
@@ -97,7 +97,7 @@ const sections = [
     content: [
       {
         subtitle: "Refund Requests and Queries",
-        text: "All refund and cancellation requests must be submitted via email to klivion@gmail.com. Please include your account email, payment reference number, and reason for the request. We aim to respond within 2 business days.",
+        text: "All refund and cancellation requests must be submitted via email to klivion.support@gmail.com. Please include your account email, payment reference number, and reason for the request. We aim to respond within 2 business days.",
       },
     ],
   },
@@ -206,7 +206,7 @@ export default function RefundPolicyPage() {
             "Full refund within 7 days of Pro plan payment",
             "No automatic renewals — you're never charged without action",
             "Refunds processed in 5–7 business days",
-            "For refund requests: klivion@gmail.com",
+            "For refund requests: klivion.support@gmail.com",
           ].map((point, i) => (
             <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
               <span style={{ color: "#30d158", fontFamily: "Manrope, sans-serif", fontSize: "14px", flexShrink: 0, marginTop: "1px" }}>✓</span>

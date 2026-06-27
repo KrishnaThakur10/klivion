@@ -186,8 +186,8 @@ export default function ShippingPolicyPage() {
             </h2>
             <p style={{ fontFamily: "Manrope, sans-serif", fontSize: "14px", color: "#a1a1a6", lineHeight: 1.7, margin: 0 }}>
               If you have any questions about this policy, email us at{" "}
-              <a href="mailto:klivion@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
-                klivion@gmail.com
+              <a href="mailto:klivion.support@gmail.com" style={{ color: "#f5f5f7", textDecoration: "none", fontWeight: 600 }}>
+                klivion.support@gmail.com
               </a>.
             </p>
           </div>
