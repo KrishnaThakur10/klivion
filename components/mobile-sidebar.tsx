@@ -69,20 +69,20 @@ export function MobileSidebar({
       {/* Overlay */}
       {open && (
         <div
-          className="fixed inset-0 z-50"
-          style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+          className="fixed inset-0 z-40"
+          style={{ background: "rgba(0,0,0,0.65)", backdropFilter: "blur(4px)" }}
           onClick={() => setOpen(false)}
         />
       )}
 
       {/* Drawer */}
       <div
-        className="fixed top-0 left-0 h-full z-50 flex flex-col w-64 transition-transform duration-300"
+        className="fixed top-0 left-0 h-full z-50 flex flex-col w-[280px] transition-transform duration-300"
         style={{
           background: "#0a0a0c",
           borderRight: "0.5px solid rgba(255,255,255,0.08)",
           transform: open ? "translateX(0)" : "translateX(-100%)",
-          boxShadow: open ? "var(--shadow-panel)" : "none",
+          boxShadow: open ? "24px 0 48px -12px rgba(0,0,0,0.8)" : "none",
         }}
       >
         {/* Drawer header */}
@@ -116,7 +116,7 @@ export function MobileSidebar({
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[14px] font-medium transition-all"
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[14px] font-medium transition-all"
                 style={
                   isActive
                     ? { background: "rgba(255,255,255,0.07)", color: "#f5f5f7" }
@@ -131,7 +131,7 @@ export function MobileSidebar({
         </nav>
 
         {/* Plan section */}
-        <div className="px-3 pb-2">
+        <div className="px-3 pb-3">
           {isPro ? (
             <div
               className="rounded-xl px-3 py-2.5 flex items-center gap-2"
@@ -148,7 +148,7 @@ export function MobileSidebar({
               className="rounded-xl p-3"
               style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-2.5">
                 <p className="text-[10px] font-semibold uppercase tracking-wider"
                   style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
                   Free Plan
@@ -169,7 +169,9 @@ export function MobileSidebar({
               ].map(item => (
                 <div key={item.label} className="mb-2 last:mb-0">
                   <div className="flex justify-between mb-1">
-                    <span className="text-[10px]" style={{ color: "var(--text-3)" }}>{item.label}</span>
+                    <span className="text-[10px]" style={{ color: "var(--text-3)" }}>
+                      {item.label}{item.monthly ? " /mo" : ""}
+                    </span>
                     <span className="text-[10px]"
                       style={{ color: item.used >= item.limit ? "var(--status-error)" : "var(--text-3)" }}>
                       {item.used}/{item.limit}
@@ -190,48 +192,51 @@ export function MobileSidebar({
           )}
         </div>
 
-        {/* User + Logout — only this section changed */}
+        {/* User + Logout */}
         <div
-          className="px-3 pb-4 pt-2 shrink-0"
+          className="px-3 py-3 shrink-0"
           style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}
         >
-          {/* User info */}
-          <div className="flex items-center gap-3 px-1 py-2">
+          {/* User row */}
+          <div
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl mb-2"
+            style={{ background: "rgba(255,255,255,0.03)", border: "0.5px solid rgba(255,255,255,0.06)" }}
+          >
             {userImage ? (
-              <img src={userImage} alt={userName}
-                className="w-7 h-7 rounded-full object-cover shrink-0"
+              <img
+                src={userImage}
+                alt={userName}
+                className="w-8 h-8 rounded-full object-cover shrink-0"
                 style={{ border: "0.5px solid rgba(255,255,255,0.14)" }}
               />
             ) : (
               <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold shrink-0"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0"
                 style={{ background: "rgba(255,255,255,0.08)", color: "#a1a1a6" }}
               >
                 {userName.charAt(0).toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-[13px] font-medium truncate" style={{ color: "#a1a1a6" }}>
+              <p className="text-[13px] font-medium truncate leading-tight" style={{ color: "#f5f5f7" }}>
                 {userName}
               </p>
-              <p className="text-[11px] truncate mt-0.5" style={{ color: "#6e6e73" }}>
+              <p className="text-[11px] truncate" style={{ color: "#6e6e73" }}>
                 {isPro ? "Pro plan" : "Free plan"}
               </p>
             </div>
           </div>
 
-          {/* Sign out button */}
+          {/* Sign out */}
           <button
             onClick={handleLogout}
             disabled={isPending}
-            className="flex items-center gap-2.5 w-full px-3 py-2 rounded-lg transition-colors text-left"
-            style={{
-              background: "rgba(255,69,58,0.06)",
-              border: "0.5px solid rgba(255,69,58,0.12)",
-              opacity: isPending ? 0.6 : 1,
-            }}
+            className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-xl transition-colors"
+            style={{ opacity: isPending ? 0.5 : 1 }}
+            onMouseEnter={e => (e.currentTarget.style.background = "rgba(255,69,58,0.08)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
           >
-            <LogOut className="w-3.5 h-3.5 shrink-0" style={{ color: "#ff453a" }} />
+            <LogOut className="w-4 h-4 shrink-0" style={{ color: "#ff453a" }} />
             <span className="text-[13px] font-medium" style={{ color: "#ff453a" }}>
               {isPending ? "Signing out..." : "Sign out"}
             </span>

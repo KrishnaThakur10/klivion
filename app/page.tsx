@@ -566,36 +566,144 @@ function FinalCTA() {
 /* ── Footer ── */
 function Footer() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
-        <div className="flex items-center gap-7">
-          <div className="flex items-center gap-2.5">
-            <span className="btn-panel grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <Zap size={13} strokeWidth={2.5} />
+    <footer style={{ borderTop: "0.5px solid rgba(255,255,255,0.08)" }}>
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        {/* Top row */}
+        <div className="flex flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
+          {/* Brand */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center"
+              style={{
+                background: "#ffffff",
+                boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px -4px rgba(0,0,0,0.6)",
+              }}
+            >
+              <Zap size={13} strokeWidth={2.5} style={{ color: "#0a0a0c" }} />
+            </div>
+            <span
+              className="text-[14px] font-bold tracking-tight"
+              style={{ color: "#f5f5f7", fontFamily: "Manrope, sans-serif" }}
+            >
+              Klivion
             </span>
-            <span className="font-bold tracking-tight">Klivion</span>
           </div>
-          <div className="flex items-center gap-2.5">
-            <Link href="/privacy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
-              Privacy Policy
-            </Link>
-            <Link href="/terms" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
-              Terms 
-            </Link>
-            <Link href="/refund-policy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
-              Refund Policy
-            </Link>
-            <Link href="/shipping-policy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
-              Shipping Policy
-            </Link>
-            <Link href="/contact" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
-              Contact Us
-            </Link>
+
+          {/* Links grid */}
+          <div className="flex flex-wrap gap-x-8 gap-y-3">
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: "#6e6e73", fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                Product
+              </p>
+              {[
+                { label: "Features", href: "/#features" },
+                { label: "Pricing", href: "/#pricing" },
+                { label: "Sign in", href: "/login" },
+              ].map(l => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  style={{
+                    fontFamily: "Manrope, sans-serif",
+                    fontSize: "13px",
+                    color: "#a1a1a6",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#f5f5f7")}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "#a1a1a6")}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: "#6e6e73", fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                Legal
+              </p>
+              {[
+                { label: "Privacy Policy", href: "/privacy" },
+                { label: "Terms of Service", href: "/terms" },
+                { label: "Refund Policy", href: "/refund-policy" },
+                { label: "Shipping Policy", href: "/shipping-policy" },
+                { label: "Contact Us", href: "/contact" },
+              ].map(l => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  style={{
+                    fontFamily: "Manrope, sans-serif",
+                    fontSize: "13px",
+                    color: "#a1a1a6",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#f5f5f7")}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "#a1a1a6")}
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p
+                className="text-[10px] font-semibold uppercase tracking-widest"
+                style={{ color: "#6e6e73", fontFamily: "'JetBrains Mono', monospace" }}
+              >
+                Support
+              </p>
+              {[
+                { label: "klivion@gmail.com", href: "mailto:klivion@gmail.com" },
+              ].map(l => (
+                <a
+                  key={l.href}
+                  href={l.href}
+                  style={{
+                    fontFamily: "Manrope, sans-serif",
+                    fontSize: "13px",
+                    color: "#a1a1a6",
+                    textDecoration: "none",
+                  }}
+                  onMouseEnter={e => ((e.target as HTMLElement).style.color = "#f5f5f7")}
+                  onMouseLeave={e => ((e.target as HTMLElement).style.color = "#a1a1a6")}
+                >
+                  {l.label}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          © 2026 Klivion. Built for freelancers, by a freelancer.
-        </p>
+
+        {/* Bottom row */}
+        <div
+          className="mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3"
+          style={{ borderTop: "0.5px solid rgba(255,255,255,0.06)" }}
+        >
+          <p
+            style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: "11px",
+              color: "#6e6e73",
+            }}
+          >
+            © 2026 Klivion. Built for Indian freelancers.
+          </p>
+          <p
+            style={{
+              fontFamily: "Manrope, sans-serif",
+              fontSize: "12px",
+              color: "#6e6e73",
+            }}
+          >
+            Proposals & invoices that get you paid faster.
+          </p>
+        </div>
       </div>
     </footer>
   )

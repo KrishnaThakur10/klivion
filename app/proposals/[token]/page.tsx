@@ -40,47 +40,55 @@ export default async function PublicProposalPage(props: {
       <nav
         className="sticky top-0 z-10 backdrop-blur-xl"
         style={{
-          background: "rgba(10,10,12,0.8)",
+          background: "rgba(10,10,12,0.85)",
           borderBottom: "0.5px solid var(--hairline)",
         }}
       >
-        <div className="max-w-3xl mx-auto px-5 md:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+        <div className="max-w-3xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between gap-3">
+          {/* Logo */}
+          <div className="flex items-center gap-2 shrink-0">
             <div
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "#ffffff", boxShadow: "var(--shadow-primary)" }}
             >
               <Zap className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
-            <span className="text-[14px] font-semibold tracking-tight">Klivion</span>
+            <span className="text-[14px] font-semibold tracking-tight hidden sm:block">
+              Klivion
+            </span>
           </div>
-          <div className="flex items-center gap-3">
-              <PDFDownloadButton
-                targetId={`proposal-${proposal.id}`}
-                filename={`${proposal.title.replace(/\s+/g, "-")}.pdf`}
-                label="Download PDF"
-              />
-              <span
-                className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md"
-                style={{
-                  background: sc.bg,
-                  color: sc.color,
-                  border: `0.5px solid ${sc.color}33`,
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                <StatusIcon className="w-3 h-3" />
-                {sc.label}
-              </span>
+
+          {/* Right side — status badge + download */}
+          <div className="flex items-center gap-2 min-w-0">
+            {/* Status badge */}
+            <span
+              className="flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-md shrink-0"
+              style={{
+                background: sc.bg,
+                color: sc.color,
+                border: `0.5px solid ${sc.color}33`,
+                fontFamily: "var(--font-mono)",
+              }}
+            >
+              <StatusIcon className="w-3 h-3" />
+              <span className="hidden sm:inline">{sc.label}</span>
+            </span>
+
+            {/* PDF download */}
+            <PDFDownloadButton
+              targetId={`proposal-${proposal.id}`}
+              filename={`${proposal.title.replace(/\s+/g, "-")}.pdf`}
+              label="Download PDF"
+            />
           </div>
         </div>
       </nav>
 
-      <div className="max-w-3xl mx-auto px-5 md:px-8 py-10 space-y-4">
-        <div id={`proposal-${proposal.id}`}> 
+      <div className="max-w-3xl mx-auto px-4 md:px-8 py-8 space-y-4">
+        <div id={`proposal-${proposal.id}`}>
           {/* Proposal meta card */}
           <div
-            className="rounded-2xl p-6 md:p-8"
+            className="rounded-2xl p-5 md:p-8 mb-4"
             style={{
               background: "var(--bg-grid)",
               border: "0.5px solid var(--hairline)",
@@ -88,12 +96,12 @@ export default async function PublicProposalPage(props: {
             }}
           >
             <h1
-              className="text-[22px] md:text-[28px] font-bold tracking-tight mb-3"
+              className="text-[20px] md:text-[28px] font-bold tracking-tight mb-3"
               style={{ color: "var(--text)", letterSpacing: "-0.02em" }}
             >
               {proposal.title}
             </h1>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[13px]" style={{ color: "var(--text-3)" }}>
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]" style={{ color: "var(--text-3)" }}>
               <span>
                 From:{" "}
                 <span className="font-medium" style={{ color: "var(--text-2)" }}>
@@ -120,7 +128,7 @@ export default async function PublicProposalPage(props: {
 
           {/* Proposal content */}
           <div
-            className="rounded-2xl p-6 md:p-10"
+            className="rounded-2xl p-5 md:p-10"
             style={{
               background: "var(--bg-grid)",
               border: "0.5px solid var(--hairline)",
@@ -161,7 +169,7 @@ export default async function PublicProposalPage(props: {
           </div>
         ) : (
           <div
-            className="rounded-2xl p-6 md:p-8"
+            className="rounded-2xl p-5 md:p-8"
             style={{
               background: "var(--bg-grid)",
               border: "0.5px solid var(--hairline-strong)",
