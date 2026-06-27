@@ -1,15 +1,14 @@
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-
-// Magic card — needs client for mouse tracking
 import { DashboardContent } from "@/components/dashboard-content"
+import { OnboardingModal } from "@/components/onboarding-modal"
 
 export default async function DashboardPage() {
   const session = await auth()
   if (!session?.user?.id) return null
   const userId = session.user.id
 
-  const [proposals, invoices, clients] = await Promise.all([
+  const [proposals, invoices, clients, settings] = await Promise.all([
     db.proposal.findMany({ where: { userId }, orderBy: { createdAt: "desc" } }),
     db.invoice.findMany({
       where: { userId },
@@ -17,7 +16,13 @@ export default async function DashboardPage() {
       orderBy: { createdAt: "desc" },
     }),
     db.client.findMany({ where: { userId } }),
+    db.userSettings.findUnique({ where: { userId } }),
   ])
+
+  // Show onboarding if user has never completed setup.
+  // A UserSettings record is created when they finish the onboarding modal
+  // (or manually save Settings). No record = first time.
+  const isNewUser = !settings
 
   const totalEarned = invoices
     .filter(i => i.status === "paid")
@@ -72,23 +77,28 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <DashboardContent
-      greeting={greeting}
-      firstName={firstName}
-      stats={stats}
-      invoices={invoices.slice(0, 6).map(inv => ({
-        id: inv.id,
-        number: inv.number,
-        status: inv.status,
-        dueDate: inv.dueDate.toISOString(),
-        total: inv.total,
-        clientName: inv.client?.name ?? null,
-      }))}
-      proposals={proposals.slice(0, 5).map(p => ({
-        id: p.id,
-        title: p.title,
-        status: p.status,
-      }))}
-    />
+    <>
+      {isNewUser && (
+        <OnboardingModal userName={session.user.name ?? "there"} />
+      )}
+      <DashboardContent
+        greeting={greeting}
+        firstName={firstName}
+        stats={stats}
+        invoices={invoices.slice(0, 6).map(inv => ({
+          id: inv.id,
+          number: inv.number,
+          status: inv.status,
+          dueDate: inv.dueDate.toISOString(),
+          total: inv.total,
+          clientName: inv.client?.name ?? null,
+        }))}
+        proposals={proposals.slice(0, 5).map(p => ({
+          id: p.id,
+          title: p.title,
+          status: p.status,
+        }))}
+      />
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import { signIn } from "@/lib/auth"
+import { Zap } from "lucide-react"
 
 import Image from "next/image"
 
@@ -10,7 +11,7 @@ export default function LoginPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-primary-foreground text-xl font-bold">K</span>
+            <Zap className="w-5 h-5" style={{ color: "#0a0a0c" }} strokeWidth={2} />
           </div>
           <h1 className="text-2xl font-bold">Welcome to Klivion</h1>
           <p className="text-muted-foreground mt-2 text-sm">
@@ -35,7 +36,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-xs text-muted-foreground mt-6">
-          By signing in, you agree to our Terms of Service
+          By signing in, you agree to our {<a href="/terms" className="text-primary underline">Terms of Service</a>}
         </p>
       </div>
     </div>
