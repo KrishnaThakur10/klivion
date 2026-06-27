@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
-  Users, Settings, Sparkles, Zap
+  Users, Settings, Zap
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { PLANS } from "@/lib/plans"
@@ -68,7 +68,7 @@ export function Sidebar({
               boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4), 0 4px 12px -4px rgba(0,0,0,0.6)",
             }}
           >
-            <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+            <Zap className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
           </div>
           <span className="text-[13px] font-semibold tracking-tight" style={{ color: "#f5f5f7" }}>
             Klivion

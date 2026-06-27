@@ -2,8 +2,9 @@
 
 import { useState } from "react"
 import {
-  Sparkles, X, Loader2, ChevronRight,
-  User, Briefcase, DollarSign, Calendar, FileText
+  X, Loader2, ChevronRight,
+  User, Briefcase, DollarSign, Calendar, FileText,
+  Zap
 } from "lucide-react"
 
 type Props = {
@@ -102,7 +103,7 @@ export function AIProposalGenerator({ onGenerated, onClose, userName, businessNa
               className="w-8 h-8 rounded-lg flex items-center justify-center"
               style={{ background: "rgba(255,255,255,0.1)", border: "0.5px solid var(--hairline-strong)" }}
             >
-              <Sparkles className="w-4 h-4" style={{ color: "var(--text)" }} />
+              <Zap className="w-4 h-4" style={{ color: "var(--text)" }} />
             </div>
             <div>
               <p className="text-[14px] font-semibold" style={{ color: "var(--text)" }}>
@@ -166,7 +167,7 @@ export function AIProposalGenerator({ onGenerated, onClose, userName, businessNa
               className="w-16 h-16 rounded-2xl flex items-center justify-center"
               style={{ background: "rgba(48,209,88,0.14)", border: "0.5px solid rgba(48,209,88,0.3)" }}
             >
-              <Sparkles className="w-7 h-7" style={{ color: "var(--status-success)" }} />
+              <Zap className="w-7 h-7" style={{ color: "var(--status-success)" }} />
             </div>
             <div className="text-center">
               <p className="text-[15px] font-semibold mb-1" style={{ color: "var(--text)" }}>
@@ -286,7 +287,7 @@ export function AIProposalGenerator({ onGenerated, onClose, userName, businessNa
               onClick={handleGenerate}
               className="btn-primary w-full justify-center py-3 text-[13px] mt-2"
             >
-              <Sparkles className="w-4 h-4" />
+              <Zap className="w-4 h-4" />
               Generate Proposal with AI
               <ChevronRight className="w-4 h-4" />
             </button>

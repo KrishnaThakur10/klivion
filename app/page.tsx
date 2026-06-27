@@ -210,10 +210,10 @@ function WireframeRing({ className = "" }: { className?: string }) {
 function Hero() {
   return (
     <section id="top" className="relative overflow-hidden pt-40 pb-24">
-      <div className="hero-glow pointer-events-none absolute inset-x-0 -top-32 h-[720px]" aria-hidden />
-      <div className="grid-bg pointer-events-none absolute inset-0 opacity-60 [mask-image:radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" aria-hidden />
-      <WireframeRing className="left-[-180px] top-[180px] h-[420px] w-[420px] opacity-50" />
-      <WireframeRing className="right-[-200px] top-[120px] h-[520px] w-[520px] opacity-40" />
+      <div className="hero-glow pointer-events-none absolute inset-x-0 -top-32 h-180  " aria-hidden />
+      <div className="grid-bg pointer-events-none absolute inset-0 opacity-60 mask-[radial-gradient(ellipse_at_top,black_30%,transparent_70%)]" aria-hidden />
+      <WireframeRing className="-left-45 top-45 h-105 w-105 opacity-50" />
+      <WireframeRing className="-right-50 top-30 h-130 w-130 opacity-40" />
       <div className="pulse-dot pointer-events-none absolute left-[12%] top-[28%] h-1.5 w-1.5 rounded-full bg-white/60" aria-hidden />
       <div className="pulse-dot pointer-events-none absolute right-[14%] top-[34%] h-1 w-1 rounded-full bg-white/40" style={{ animationDelay: "0.8s" }} aria-hidden />
       <div className="pulse-dot pointer-events-none absolute left-[20%] top-[60%] h-1 w-1 rounded-full bg-white/50" style={{ animationDelay: "1.6s" }} aria-hidden />
@@ -245,10 +245,10 @@ function Hero() {
         </div>
 
         {/* Dashboard mockup */}
-        <div className="reveal mt-20 [perspective:1800px]">
+        <div className="reveal mt-20 perspective-[1800px]">
           <div className="float-tilt mx-auto max-w-5xl">
             <div className="hairline-strong relative rounded-2xl bg-surface p-1.5 shadow-[0_60px_120px_-40px_rgba(0,0,0,0.8),0_0_0_1px_rgba(255,255,255,0.06)]">
-              <div className="pointer-events-none absolute -inset-px rounded-2xl bg-gradient-to-b from-white/10 to-transparent opacity-60" aria-hidden />
+              <div className="pointer-events-none absolute -inset-px rounded-2xl bg-linear-to-b from-white/10 to-transparent opacity-60" aria-hidden />
               <img
                 src="/dashboard-mockup.png"
                 alt="Klivion dashboard showing earnings, proposals, and invoices"
@@ -281,7 +281,7 @@ function CapabilityStrip() {
         <div className="reveal mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border md:grid-cols-4">
           {items.map(({ icon: Icon, label }) => (
             <div key={label} className="flex flex-col items-center justify-center gap-3 bg-background px-6 py-10">
-              <span className="hairline-strong grid h-11 w-11 place-items-center rounded-xl bg-white/[0.03]">
+              <span className="hairline-strong grid h-11 w-11 place-items-center rounded-xl bg-white/3">
                 <Icon size={18} />
               </span>
               <span className="text-sm font-medium">{label}</span>
@@ -318,7 +318,7 @@ function Features() {
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div key={title} className="reveal">
               <MagicCard className="h-full">
-                <span className="hairline-strong inline-grid h-11 w-11 place-items-center rounded-xl bg-white/[0.03]">
+                <span className="hairline-strong inline-grid h-11 w-11 place-items-center rounded-xl bg-white/3">
                   <Icon size={18} />
                 </span>
                 <h3 className="mt-5 text-lg font-semibold">{title}</h3>
@@ -351,7 +351,7 @@ function HowItWorks() {
         </div>
         <div className="relative mt-14 sm:mt-16">
           <div aria-hidden
-            className="pointer-events-none absolute left-[34px] top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-border-strong to-transparent md:left-0 md:right-0 md:top-[64px] md:bottom-auto md:h-px md:w-auto md:bg-gradient-to-r"
+            className="pointer-events-none absolute left-8.5 top-0 bottom-0 w-px bg-linear-to-b from-transparent via-border-strong to-transparent md:left-0 md:right-0 md:top-16 md:bottom-auto md:h-px md:w-auto md:bg-linear-to-r"
           />
           <div className="grid gap-5 md:grid-cols-3 md:gap-6">
             {STEPS.map(({ n, icon: Icon, title, desc }, i) => (
@@ -359,7 +359,7 @@ function HowItWorks() {
                 <MagicCard className="h-full p-6 sm:p-7">
                   <div className="grid grid-cols-[auto_1fr] items-start gap-4 md:block">
                     <div className="relative">
-                      <span className="btn-panel relative z-10 grid h-[56px] w-[56px] shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground sm:h-[64px] sm:w-[64px]">
+                      <span className="btn-panel relative z-10 grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary text-primary-foreground sm:h-16 sm:w-16">
                         <Icon size={22} strokeWidth={2.2} />
                       </span>
                       <span aria-hidden className="pointer-events-none absolute inset-0 rounded-2xl bg-white/20 blur-2xl opacity-40" />
@@ -406,7 +406,7 @@ function Why() {
             <div key={title} className="reveal">
               <MagicCard className="h-full">
                 <div className="flex gap-5">
-                  <span className="hairline-strong grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/[0.03]">
+                  <span className="hairline-strong grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-white/3">
                     <Icon size={18} />
                   </span>
                   <div className="min-w-0">
@@ -538,7 +538,7 @@ function FinalCTA() {
   return (
     <section className="relative overflow-hidden py-32">
       <div className="cta-glow pointer-events-none absolute inset-0" aria-hidden />
-      <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 [mask-image:radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" aria-hidden />
+      <div className="grid-bg pointer-events-none absolute inset-0 opacity-30 mask-[radial-gradient(ellipse_at_center,black_20%,transparent_70%)]" aria-hidden />
       <div className="pulse-dot pointer-events-none absolute left-[20%] top-[30%] h-1 w-1 rounded-full bg-white/60" aria-hidden />
       <div className="pulse-dot pointer-events-none absolute right-[24%] top-[60%] h-1.5 w-1.5 rounded-full bg-white/40" style={{ animationDelay: "1s" }} aria-hidden />
       <div className="relative mx-auto max-w-3xl px-4 text-center">
@@ -568,11 +568,24 @@ function Footer() {
   return (
     <footer className="border-t border-border">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
-        <div className="flex items-center gap-2.5">
-          <span className="btn-panel grid h-7 w-7 place-items-center rounded-[8px] bg-primary text-primary-foreground">
-            <Zap size={13} strokeWidth={2.5} />
-          </span>
-          <span className="font-bold tracking-tight">Klivion</span>
+        <div className="flex items-center gap-7">
+          <div className="flex items-center gap-2.5">
+            <span className="btn-panel grid h-7 w-7 place-items-center rounded-lg bg-primary text-primary-foreground">
+              <Zap size={13} strokeWidth={2.5} />
+            </span>
+            <span className="font-bold tracking-tight">Klivion</span>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <Link href="/privacy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
+              Privacy Policy
+            </Link>
+            <Link href="/terms" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
+              Terms 
+            </Link>
+            <Link href="/refund-policy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
+              Refund Policy
+            </Link>
+          </div>
         </div>
         <p className="text-xs text-muted-foreground">
           © 2026 Klivion. Built for freelancers, by a freelancer.

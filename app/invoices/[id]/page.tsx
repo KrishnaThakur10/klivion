@@ -3,8 +3,8 @@ import { notFound } from "next/navigation"
 import { PayNowButton } from "@/components/pay-now-button"
 import { PDFDownloadButton } from "@/components/pdf-download-button"
 import {
-  Sparkles, CheckCircle2, Clock,
-  AlertCircle, Receipt
+  CheckCircle2, Clock,
+  AlertCircle, Receipt, Zap
 } from "lucide-react"
 
 export default async function PublicInvoicePage(props: {
@@ -59,7 +59,7 @@ export default async function PublicInvoicePage(props: {
               className="w-7 h-7 rounded-lg flex items-center justify-center"
               style={{ background: "#ffffff", boxShadow: "var(--shadow-primary)" }}
             >
-              <Sparkles className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+              <Zap className="w-3.5 h-3.5" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
             <span className="text-[14px] font-semibold tracking-tight">Klivion</span>
           </div>

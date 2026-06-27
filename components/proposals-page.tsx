@@ -12,7 +12,7 @@ import {
   Plus, ArrowLeft, Trash2, Send,
   CheckCircle2, Clock, AlertCircle,
   FileText, Copy, Check, ExternalLink,
-  MoreHorizontal, Link as LinkIcon, Sparkles 
+  MoreHorizontal, Link as LinkIcon, Zap 
 } from "lucide-react"
 import { AIProposalGenerator } from "@/components/ai-proposal-generator"
 import { UpgradeModal } from "@/components/upgrade-modal"
@@ -282,7 +282,7 @@ function handleCreate() {
             }}
             className="btn-ghost text-[13px] flex items-center gap-1.5"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Zap className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">AI Generate</span>
             {!isPro && (
               <span

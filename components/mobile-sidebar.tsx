@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard, FileText, Receipt,
-  Users, Settings, Sparkles, Menu, X, Zap
+  Users, Settings, Menu, X, Zap
 } from "lucide-react"
 import { PLANS } from "@/lib/plans"
 
@@ -45,7 +45,7 @@ export function MobileSidebar({
         <Link href="/" className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-lg flex items-center justify-center"
             style={{ background: "#ffffff" }}>
-            <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+            <Zap className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
           </div>
           <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>Klivion</span>
         </Link>
@@ -85,7 +85,7 @@ export function MobileSidebar({
           <Link href="/" onClick={() => setOpen(false)} className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center"
               style={{ background: "#ffffff" }}>
-              <Sparkles className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
+              <Zap className="w-3 h-3" style={{ color: "#0a0a0c" }} strokeWidth={2.5} />
             </div>
             <span className="text-[13px] font-semibold" style={{ color: "#f5f5f7" }}>Klivion</span>
           </Link>
@@ -155,9 +155,9 @@ export function MobileSidebar({
                 </Link>
               </div>
               {[
-                { label: "Proposals", used: counts.proposals, limit: freeLimits.proposals },
-                { label: "Invoices",  used: counts.invoices,  limit: freeLimits.invoices },
-                { label: "Clients",   used: counts.clients,   limit: freeLimits.clients },
+                { label: "Proposals", used: counts.proposals, limit: freeLimits.proposalsPerMonth, monthly: true },
+                { label: "Invoices",  used: counts.invoices,  limit: freeLimits.invoicesPerMonth, monthly: true },
+                { label: "Clients",   used: counts.clients,   limit: freeLimits.clientsTotal, monthly: false },
               ].map(item => (
                 <div key={item.label} className="mb-2 last:mb-0">
                   <div className="flex justify-between mb-1">
