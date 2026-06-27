@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import Script from "next/script"
+import { GoogleTagManager } from '@next/third-parties/google'
 
 export const metadata: Metadata = {
   title: "Klivion — Proposals & Invoices for Freelancers",
@@ -23,6 +24,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen antialiased ">
+        <GoogleTagManager gtmId="G-GEEERHMDH7" />
         {children}
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
