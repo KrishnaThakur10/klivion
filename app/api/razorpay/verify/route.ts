@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import crypto from "crypto"
 import { db } from "@/lib/db"
-import { sendEmail } from "@/lib/email"
-import { paymentReceivedEmail } from "@/lib/email-templates"
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,9 +9,14 @@ export async function POST(req: NextRequest) {
       razorpay_payment_id,
       razorpay_signature,
       invoiceId,
-    } = await req.json()
+    } = await req.json() as {
+      razorpay_order_id: string
+      razorpay_payment_id: string
+      razorpay_signature: string
+      invoiceId: string
+    }
 
-    // Validate all fields present
+    // 1. Validate all fields are present
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !invoiceId) {
       return NextResponse.json(
         { success: false, error: "Missing payment details" },
@@ -21,27 +24,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // CRITICAL: Verify signature using HMAC-SHA256
-    // This proves the payment response came from Razorpay, not a hacker
-    const body = razorpay_order_id + "|" + razorpay_payment_id
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET!)
-      .update(body)
-      .digest("hex")
-
-    const isSignatureValid = expectedSignature === razorpay_signature
-
-    if (!isSignatureValid) {
-      console.error("Invalid Razorpay signature — possible fraud attempt")
-      return NextResponse.json(
-        { success: false, error: "Payment verification failed" },
-        { status: 400 }
-      )
-    }
-
-    // Signature valid — update invoice status
-    const invoice = await db.invoice.findFirst({
+    // 2. Fetch invoice — we need userId to look up the freelancer's secret
+    const invoice = await db.invoice.findUnique({
       where: { id: invoiceId },
+      select: {
+        id: true,
+        number: true,
+        status: true,
+        userId: true,
+        razorpayOrderId: true,
+      },
     })
 
     if (!invoice) {
@@ -51,6 +43,57 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    // 3. Guard against double-payment
+    if (invoice.status === "paid") {
+      return NextResponse.json(
+        { success: false, error: "Invoice is already paid" },
+        { status: 409 }
+      )
+    }
+
+    // 4. Confirm order ID matches what we stored when creating the order
+    //    Prevents a tampered order_id being swapped in
+    if (invoice.razorpayOrderId !== razorpay_order_id) {
+      console.error("Order ID mismatch — possible tampering", {
+        stored: invoice.razorpayOrderId,
+        received: razorpay_order_id,
+      })
+      return NextResponse.json(
+        { success: false, error: "Order ID mismatch" },
+        { status: 400 }
+      )
+    }
+
+    // 5. Fetch the freelancer's own Razorpay secret
+    //    Each freelancer uses their own account — money flows directly to them
+    const settings = await db.userSettings.findUnique({
+      where: { userId: invoice.userId },
+      select: { razorpaySecret: true },
+    })
+
+    if (!settings?.razorpaySecret) {
+      return NextResponse.json(
+        { success: false, error: "Razorpay not configured for this account" },
+        { status: 400 }
+      )
+    }
+
+    // 6. Verify HMAC-SHA256 signature using the freelancer's secret
+    //    Razorpay signs: razorpay_order_id + "|" + razorpay_payment_id
+    const expectedSignature = crypto
+      .createHmac("sha256", settings.razorpaySecret)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex")
+
+    if (expectedSignature !== razorpay_signature) {
+      console.error("Invalid Razorpay signature — possible fraud attempt")
+      return NextResponse.json(
+        { success: false, error: "Payment verification failed" },
+        { status: 400 }
+      )
+    }
+
+    // 7. Signature valid — mark invoice as paid
     await db.invoice.update({
       where: { id: invoiceId },
       data: {
@@ -58,27 +101,6 @@ export async function POST(req: NextRequest) {
         razorpayPaymentId: razorpay_payment_id,
       },
     })
-    const updatedInvoice = await db.invoice.findFirst({
-      where: { id: invoiceId },
-      include: { user: true, client: true },
-    })
-
-    if (updatedInvoice?.user?.email) {
-      const { subject, html } = paymentReceivedEmail({
-        invoiceNumber: updatedInvoice.number,
-        freelancerName: updatedInvoice.user.name ?? "",
-        freelancerEmail: updatedInvoice.user.email,
-        clientName: updatedInvoice.client?.name ?? "Your client",
-        amount: updatedInvoice.total,
-      })
-
-      await sendEmail({
-        to: updatedInvoice.user.email,
-        toName: updatedInvoice.user.name ?? "",
-        subject,
-        html,
-      })
-    }
 
     console.log(`Invoice ${invoice.number} paid successfully via Razorpay`)
 
