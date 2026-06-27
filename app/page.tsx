@@ -585,6 +585,12 @@ function Footer() {
             <Link href="/refund-policy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
               Refund Policy
             </Link>
+            <Link href="/shipping-policy" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
+              Shipping Policy
+            </Link>
+            <Link href="/contact" style={{ fontFamily: "Manrope, sans-serif", fontSize: "13px", color: "#6e6e73", textDecoration: "none" }}>
+              Contact Us
+            </Link>
           </div>
         </div>
         <p className="text-xs text-muted-foreground">
