@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import Razorpay from "razorpay"
 import { db } from "@/lib/db"
 import { getPlanFeatures } from "@/lib/plans"
+import { createCashfreeOrder } from "@/lib/cashfree"
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     const invoice = await db.invoice.findFirst({
       where: { id: invoiceId },
-      include: { lineItems: true, user: true },
+      include: { lineItems: true, user: true, client: true },
     })
 
     if (!invoice) {
@@ -52,11 +53,79 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Get the freelancer's own Razorpay keys from their settings
+    // Get the freelancer's settings — provider choice + keys
     const settings = await db.userSettings.findUnique({
       where: { userId: invoice.userId },
     })
 
+    const provider = settings?.paymentProvider ?? "razorpay"
+    const amountInPaise = Math.round(invoice.total * 100)
+
+    if (amountInPaise <= 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid invoice amount" },
+        { status: 400 }
+      )
+    }
+
+    // ───────────────── Cashfree ─────────────────
+    if (provider === "cashfree") {
+      if (!settings?.cashfreeAppId || !settings?.cashfreeSecretKey) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Cashfree is not connected. Please add your Cashfree keys in Settings.",
+          },
+          { status: 400 }
+        )
+      }
+       if (!invoice.client?.phone) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "This client doesn't have a phone number on file. Cashfree requires it to process payment — please add one to the client before sending this invoice.",
+            missingPhone: true,
+          },
+          { status: 400 }
+        )
+      }
+
+      const orderId = `inv_${invoice.number}_${Date.now()}`
+      const appUrl = process.env.NEXTAUTH_URL || ""
+
+      const order = await createCashfreeOrder({
+        appId: settings.cashfreeAppId,
+        secretKey: settings.cashfreeSecretKey,
+        orderId,
+        orderAmount: invoice.total, // Cashfree wants rupees, not paise
+        customerName: invoice.client?.name || "Customer",
+        customerEmail: invoice.client?.email || "no-reply@klivion.app",
+        customerPhone: invoice.client.phone,
+        returnUrl: `${appUrl}/invoices/${invoice.id}?cf_order_id={order_id}`,
+        notifyUrl: `${appUrl}/api/cashfree/webhook`,
+        orderNote: `Payment for invoice ${invoice.number}`,
+      })
+
+      await db.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          paymentProvider: "cashfree",
+          cashfreeOrderId: order.order_id,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        provider: "cashfree",
+        order: {
+          id: order.order_id,
+          paymentSessionId: order.payment_session_id,
+        },
+        appId: settings.cashfreeAppId,
+      })
+    }
+
+    // ───────────────── Razorpay (default) ─────────────────
     if (!settings?.razorpayKeyId || !settings?.razorpaySecret) {
       return NextResponse.json(
         {
@@ -67,20 +136,10 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Use the freelancer's keys — money goes directly to them
     const razorpay = new Razorpay({
       key_id: settings.razorpayKeyId,
       key_secret: settings.razorpaySecret,
     })
-
-    const amountInPaise = Math.round(invoice.total * 100)
-
-    if (amountInPaise <= 0) {
-      return NextResponse.json(
-        { success: false, error: "Invalid invoice amount" },
-        { status: 400 }
-      )
-    }
 
     const order = await razorpay.orders.create({
       amount: amountInPaise,
@@ -94,12 +153,15 @@ export async function POST(req: NextRequest) {
 
     await db.invoice.update({
       where: { id: invoiceId },
-      data: { razorpayOrderId: order.id },
+      data: {
+        paymentProvider: "razorpay",
+        razorpayOrderId: order.id,
+      },
     })
 
-    // Return freelancer's public key ID to the frontend — safe to expose
     return NextResponse.json({
       success: true,
+      provider: "razorpay",
       order: {
         id: order.id,
         amount: order.amount,
@@ -108,7 +170,7 @@ export async function POST(req: NextRequest) {
       keyId: settings.razorpayKeyId,
     })
   } catch (error) {
-    console.error("Razorpay order creation error:", error)
+    console.error("Payment order creation error:", error)
     return NextResponse.json(
       { success: false, error: "Failed to create payment order. Please try again." },
       { status: 500 }

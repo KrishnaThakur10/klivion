@@ -1,39 +1,23 @@
 import { NextRequest, NextResponse } from "next/server"
-import crypto from "crypto"
+import Razorpay from "razorpay"
 import { db } from "@/lib/db"
+import { getPlanFeatures } from "@/lib/plans"
+import { createCashfreeOrder } from "@/lib/cashfree"
 
 export async function POST(req: NextRequest) {
   try {
-    const {
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature,
-      invoiceId,
-    } = await req.json() as {
-      razorpay_order_id: string
-      razorpay_payment_id: string
-      razorpay_signature: string
-      invoiceId: string
-    }
+    const { invoiceId } = await req.json()
 
-    // 1. Validate all fields are present
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !invoiceId) {
+    if (!invoiceId) {
       return NextResponse.json(
-        { success: false, error: "Missing payment details" },
+        { success: false, error: "Invoice ID required" },
         { status: 400 }
       )
     }
 
-    // 2. Fetch invoice — we need userId to look up the freelancer's secret
-    const invoice = await db.invoice.findUnique({
+    const invoice = await db.invoice.findFirst({
       where: { id: invoiceId },
-      select: {
-        id: true,
-        number: true,
-        status: true,
-        userId: true,
-        razorpayOrderId: true,
-      },
+      include: { lineItems: true, user: true, client: true },
     })
 
     if (!invoice) {
@@ -43,72 +27,142 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 3. Guard against double-payment
     if (invoice.status === "paid") {
       return NextResponse.json(
-        { success: false, error: "Invoice is already paid" },
-        { status: 409 }
-      )
-    }
-
-    // 4. Confirm order ID matches what we stored when creating the order
-    //    Prevents a tampered order_id being swapped in
-    if (invoice.razorpayOrderId !== razorpay_order_id) {
-      console.error("Order ID mismatch — possible tampering", {
-        stored: invoice.razorpayOrderId,
-        received: razorpay_order_id,
-      })
-      return NextResponse.json(
-        { success: false, error: "Order ID mismatch" },
+        { success: false, error: "Invoice already paid" },
         { status: 400 }
       )
     }
 
-    // 5. Fetch the freelancer's own Razorpay secret
-    //    Each freelancer uses their own account — money flows directly to them
-    const settings = await db.userSettings.findUnique({
-      where: { userId: invoice.userId },
-      select: { razorpaySecret: true },
+    // Check if the freelancer's plan allows payments
+    const user = await db.user.findUnique({
+      where: { id: invoice.userId },
+      select: { plan: true },
     })
 
-    if (!settings?.razorpaySecret) {
+    const features = getPlanFeatures(user?.plan ?? "free")
+
+    if (!features.payments) {
       return NextResponse.json(
-        { success: false, error: "Razorpay not configured for this account" },
+        {
+          success: false,
+          error: "Online payments require a Pro plan. Upgrade to start accepting payments.",
+          limitReached: true,
+        },
+        { status: 403 }
+      )
+    }
+
+    // Get the freelancer's settings — provider choice + keys
+    const settings = await db.userSettings.findUnique({
+      where: { userId: invoice.userId },
+    })
+
+    const provider = settings?.paymentProvider ?? "razorpay"
+    const amountInPaise = Math.round(invoice.total * 100)
+
+    if (amountInPaise <= 0) {
+      return NextResponse.json(
+        { success: false, error: "Invalid invoice amount" },
         { status: 400 }
       )
     }
 
-    // 6. Verify HMAC-SHA256 signature using the freelancer's secret
-    //    Razorpay signs: razorpay_order_id + "|" + razorpay_payment_id
-    const expectedSignature = crypto
-      .createHmac("sha256", settings.razorpaySecret)
-      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-      .digest("hex")
+    // ───────────────── Cashfree ─────────────────
+    if (provider === "cashfree") {
+      if (!settings?.cashfreeAppId || !settings?.cashfreeSecretKey) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Cashfree is not connected. Please add your Cashfree keys in Settings.",
+          },
+          { status: 400 }
+        )
+      }
 
-    if (expectedSignature !== razorpay_signature) {
-      console.error("Invalid Razorpay signature — possible fraud attempt")
+      const orderId = `inv_${invoice.number}_${Date.now()}`
+      const appUrl = process.env.NEXTAUTH_URL || ""
+
+      const order = await createCashfreeOrder({
+        appId: settings.cashfreeAppId,
+        secretKey: settings.cashfreeSecretKey,
+        orderId,
+        orderAmount: invoice.total, // Cashfree wants rupees, not paise
+        customerName: invoice.client?.name || "Customer",
+        customerEmail: invoice.client?.email || "no-reply@klivion.app",
+        customerPhone: invoice.client?.phone || "9999999999",
+        returnUrl: `${appUrl}/invoices/${invoice.id}?cf_order_id={order_id}`,
+        notifyUrl: `${appUrl}/api/cashfree/webhook`,
+        orderNote: `Payment for invoice ${invoice.number}`,
+      })
+
+      await db.invoice.update({
+        where: { id: invoiceId },
+        data: {
+          paymentProvider: "cashfree",
+          cashfreeOrderId: order.order_id,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        provider: "cashfree",
+        order: {
+          id: order.order_id,
+          paymentSessionId: order.payment_session_id,
+        },
+        appId: settings.cashfreeAppId,
+      })
+    }
+
+    // ───────────────── Razorpay (default) ─────────────────
+    if (!settings?.razorpayKeyId || !settings?.razorpaySecret) {
       return NextResponse.json(
-        { success: false, error: "Payment verification failed" },
+        {
+          success: false,
+          error: "Razorpay is not connected. Please add your Razorpay keys in Settings.",
+        },
         { status: 400 }
       )
     }
 
-    // 7. Signature valid — mark invoice as paid
-    await db.invoice.update({
-      where: { id: invoiceId },
-      data: {
-        status: "paid",
-        razorpayPaymentId: razorpay_payment_id,
+    const razorpay = new Razorpay({
+      key_id: settings.razorpayKeyId,
+      key_secret: settings.razorpaySecret,
+    })
+
+    const order = await razorpay.orders.create({
+      amount: amountInPaise,
+      currency: "INR",
+      receipt: `inv_${invoice.number}_${Date.now()}`,
+      notes: {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.number,
       },
     })
 
-    console.log(`Invoice ${invoice.number} paid successfully via Razorpay`)
+    await db.invoice.update({
+      where: { id: invoiceId },
+      data: {
+        paymentProvider: "razorpay",
+        razorpayOrderId: order.id,
+      },
+    })
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      provider: "razorpay",
+      order: {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+      },
+      keyId: settings.razorpayKeyId,
+    })
   } catch (error) {
-    console.error("Payment verification error:", error)
+    console.error("Payment order creation error:", error)
     return NextResponse.json(
-      { success: false, error: "Verification failed" },
+      { success: false, error: "Failed to create payment order. Please try again." },
       { status: 500 }
     )
   }

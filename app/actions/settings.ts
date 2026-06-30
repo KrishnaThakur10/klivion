@@ -10,8 +10,11 @@ const SettingsSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   website: z.string().optional(),
+  paymentProvider: z.enum(["razorpay", "cashfree"]).optional(),
   razorpayKeyId: z.string().optional(),
   razorpaySecret: z.string().optional(),
+  cashfreeAppId: z.string().optional(),
+  cashfreeSecretKey: z.string().optional(),
 })
 
 export async function updateSettings(data: {
@@ -19,8 +22,11 @@ export async function updateSettings(data: {
   phone?: string
   address?: string
   website?: string
+  paymentProvider?: string
   razorpayKeyId?: string
   razorpaySecret?: string
+  cashfreeAppId?: string
+  cashfreeSecretKey?: string
 }) {
   const session = await auth()
   if (!session?.user?.id) throw new Error("Unauthorized")

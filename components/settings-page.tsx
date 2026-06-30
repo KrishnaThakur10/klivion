@@ -12,8 +12,11 @@ type Settings = {
   phone: string
   address: string
   website: string
+  paymentProvider: string
   razorpayKeyId: string
   razorpaySecret: string
+  cashfreeAppId: string
+  cashfreeSecretKey: string
 }
 
 export function SettingsPage({
@@ -33,6 +36,10 @@ export function SettingsPage({
   const [website, setWebsite] = useState(initialSettings.website)
   const [razorpayKeyId, setRazorpayKeyId] = useState(initialSettings.razorpayKeyId)
   const [razorpaySecret, setRazorpaySecret] = useState(initialSettings.razorpaySecret)
+  const [paymentProvider, setPaymentProvider] = useState(initialSettings.paymentProvider || "razorpay")
+  const [cashfreeAppId, setCashfreeAppId] = useState(initialSettings.cashfreeAppId)
+  const [cashfreeSecretKey, setCashfreeSecretKey] = useState(initialSettings.cashfreeSecretKey)
+  const [showCashfreeSecret, setShowCashfreeSecret] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState("")
@@ -44,7 +51,8 @@ export function SettingsPage({
     startTransition(async () => {
       const result = await updateSettings({
         businessName, phone, address, website,
-        razorpayKeyId, razorpaySecret,
+        paymentProvider, razorpayKeyId, razorpaySecret,
+        cashfreeAppId, cashfreeSecretKey,
       })
       if (result?.error) {
         setError(result.error)
@@ -168,89 +176,213 @@ export function SettingsPage({
           </div>
         </div>
 
-        {/* Razorpay card */}
+        {/* Payment provider card */}
         <div
           className="rounded-2xl p-5"
           style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)", boxShadow: "var(--shadow-panel)" }}
         >
           <div className="flex items-center gap-2 mb-1">
             <CreditCard className="w-4 h-4" style={{ color: "var(--text-3)" }} />
-            <p className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Connect Razorpay</p>
+            <p className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>Payment Provider</p>
           </div>
           <p className="text-[12px] mb-4" style={{ color: "var(--text-3)" }}>
-            Connect your Razorpay account so clients can pay your invoices directly. Keys are stored securely.
+            Choose how clients pay your invoices. Connect one provider below — money goes directly to your account, Klivion never touches it.
           </p>
 
+          {/* Provider toggle */}
           <div
-            className="rounded-xl p-3 mb-4"
+            className="flex gap-1 p-1 rounded-xl mb-5"
             style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
           >
-            <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-              style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-              How to get your keys
-            </p>
-            <ol className="text-[12px] space-y-0.5 list-decimal list-inside" style={{ color: "var(--text-2)" }}>
-              <li>Go to razorpay.com → Sign up / Login</li>
-              <li>Settings → API Keys → Websites & API Keys</li>
-              <li>Generate Test Key (or Live Key for real payments)</li>
-              <li>Copy Key ID and Key Secret below</li>
-            </ol>
+            <button
+              type="button"
+              onClick={() => setPaymentProvider("razorpay")}
+              className="flex-1 py-2 rounded-lg text-[12px] font-semibold transition-colors"
+              style={
+                paymentProvider === "razorpay"
+                  ? { background: "#ffffff", color: "#0a0a0c" }
+                  : { background: "transparent", color: "var(--text-3)" }
+              }
+            >
+              Razorpay
+            </button>
+            <button
+              type="button"
+              onClick={() => setPaymentProvider("cashfree")}
+              className="flex-1 py-2 rounded-lg text-[12px] font-semibold transition-colors"
+              style={
+                paymentProvider === "cashfree"
+                  ? { background: "#ffffff", color: "#0a0a0c" }
+                  : { background: "transparent", color: "var(--text-3)" }
+              }
+            >
+              Cashfree
+            </button>
           </div>
 
-          <div className="space-y-3">
-            <div>
-              <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                Razorpay Key ID
-              </label>
-              <input
-                value={razorpayKeyId}
-                onChange={e => setRazorpayKeyId(e.target.value)}
-                placeholder="rzp_test_xxxxxxxxxx"
-                className="ui-input"
-                style={{ fontFamily: "var(--font-mono)" }}
-              />
-            </div>
-            <div>
-              <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
-                style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                Razorpay Key Secret
-              </label>
-              <div className="relative">
-                <input
-                  value={razorpaySecret}
-                  onChange={e => setRazorpaySecret(e.target.value)}
-                  type={showSecret ? "text" : "password"}
-                  placeholder="••••••••••••••••"
-                  className="ui-input pr-10"
-                  style={{ fontFamily: "var(--font-mono)" }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowSecret(!showSecret)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                  style={{ color: "var(--text-3)" }}
-                  onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
-                  onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
-                >
-                  {showSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-              <p className="text-[11px] mt-1.5" style={{ color: "var(--text-3)" }}>
-                🔒 Stored securely. Never visible to clients.
-              </p>
-            </div>
-
-            {razorpayKeyId && (
+          {paymentProvider === "razorpay" ? (
+            <>
               <div
-                className="flex items-center gap-2 text-[12px] px-3 py-2.5 rounded-lg"
-                style={{ background: "var(--status-success-bg)", color: "var(--status-success)", border: "0.5px solid rgba(48,209,88,0.25)" }}
+                className="rounded-xl p-3 mb-4"
+                style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
               >
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                Razorpay connected — clients can pay your invoices online
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                  How to get your keys
+                </p>
+                <ol className="text-[12px] space-y-0.5 list-decimal list-inside" style={{ color: "var(--text-2)" }}>
+                  <li>Go to razorpay.com → Sign up / Login</li>
+                  <li>Settings → API Keys → Websites & API Keys</li>
+                  <li>Generate Test Key (or Live Key for real payments)</li>
+                  <li>Copy Key ID and Key Secret below</li>
+                </ol>
               </div>
-            )}
-          </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                    Razorpay Key ID
+                  </label>
+                  <input
+                    value={razorpayKeyId}
+                    onChange={e => setRazorpayKeyId(e.target.value)}
+                    placeholder="rzp_test_xxxxxxxxxx"
+                    className="ui-input"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                    Razorpay Key Secret
+                  </label>
+                  <div className="relative">
+                    <input
+                      value={razorpaySecret}
+                      onChange={e => setRazorpaySecret(e.target.value)}
+                      type={showSecret ? "text" : "password"}
+                      placeholder="••••••••••••••••"
+                      className="ui-input pr-10"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowSecret(!showSecret)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                      style={{ color: "var(--text-3)" }}
+                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
+                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
+                    >
+                      {showSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] mt-1.5" style={{ color: "var(--text-3)" }}>
+                    🔒 Stored securely. Never visible to clients.
+                  </p>
+                </div>
+
+                {razorpayKeyId && (
+                  <div
+                    className="flex items-center gap-2 text-[12px] px-3 py-2.5 rounded-lg"
+                    style={{ background: "var(--status-success-bg)", color: "var(--status-success)", border: "0.5px solid rgba(48,209,88,0.25)" }}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    Razorpay connected — clients can pay your invoices online
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div
+                className="rounded-xl p-3 mb-4"
+                style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+              >
+                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                  How to get your keys
+                </p>
+                <ol className="text-[12px] space-y-0.5 list-decimal list-inside" style={{ color: "var(--text-2)" }}>
+                  <li>Go to cashfree.com → Sign up / Login</li>
+                  <li>Developers → API Keys</li>
+                  <li>Generate Test (Sandbox) or Live App ID + Secret Key</li>
+                  <li>Copy App ID and Secret Key below</li>
+                </ol>
+              </div>
+
+              <div className="space-y-3">
+                <div>
+                  <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                    Cashfree App ID
+                  </label>
+                  <input
+                    value={cashfreeAppId}
+                    onChange={e => setCashfreeAppId(e.target.value)}
+                    placeholder="TEST10xxxxxxxxxxxxxxxxxxxxxxxxx"
+                    className="ui-input"
+                    style={{ fontFamily: "var(--font-mono)" }}
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1.5 text-[11px] font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                    Cashfree Secret Key
+                  </label>
+                  <div className="relative">
+                    <input
+                      value={cashfreeSecretKey}
+                      onChange={e => setCashfreeSecretKey(e.target.value)}
+                      type={showCashfreeSecret ? "text" : "password"}
+                      placeholder="••••••••••••••••"
+                      className="ui-input pr-10"
+                      style={{ fontFamily: "var(--font-mono)" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowCashfreeSecret(!showCashfreeSecret)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                      style={{ color: "var(--text-3)" }}
+                      onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-2)")}
+                      onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "var(--text-3)")}
+                    >
+                      {showCashfreeSecret ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+                  <p className="text-[11px] mt-1.5" style={{ color: "var(--text-3)" }}>
+                    🔒 Stored securely. Never visible to clients.
+                  </p>
+                </div>
+
+                <div
+                  className="rounded-xl p-3"
+                  style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+                >
+                  <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5"
+                    style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                    Webhook URL (optional, recommended)
+                  </p>
+                  <p className="text-[12px]" style={{ color: "var(--text-2)" }}>
+                    In Cashfree Dashboard → Developers → Webhooks, add:
+                  </p>
+                  <p className="text-[12px] mt-1 break-all" style={{ color: "var(--text)", fontFamily: "var(--font-mono)" }}>
+                    https://klivion.vercel.app/api/cashfree/webhook
+                  </p>
+                </div>
+
+                {cashfreeAppId && (
+                  <div
+                    className="flex items-center gap-2 text-[12px] px-3 py-2.5 rounded-lg"
+                    style={{ background: "var(--status-success-bg)", color: "var(--status-success)", border: "0.5px solid rgba(48,209,88,0.25)" }}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                    Cashfree connected — clients can pay your invoices online
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

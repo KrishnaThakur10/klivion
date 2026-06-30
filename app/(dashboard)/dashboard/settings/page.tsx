@@ -17,8 +17,11 @@ export default async function Page() {
         phone: settings?.phone ?? "",
         address: settings?.address ?? "",
         website: settings?.website ?? "",
+        paymentProvider: settings?.paymentProvider ?? "razorpay",
         razorpayKeyId: settings?.razorpayKeyId ?? "",
         razorpaySecret: settings?.razorpaySecret ?? "",
+        cashfreeAppId: settings?.cashfreeAppId ?? "",
+        cashfreeSecretKey: settings?.cashfreeSecretKey ?? "",
       }}
       userName={session.user.name ?? ""}
       userEmail={session.user.email ?? ""}
