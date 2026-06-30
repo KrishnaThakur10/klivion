@@ -659,7 +659,7 @@ function Footer() {
                 Support
               </p>
               {[
-                { label: "klivion@gmail.com", href: "mailto:klivion@gmail.com" },
+                { label: "klivion.support@gmail.com", href: "mailto:klivion.support@gmail.com" },
               ].map(l => (
                 <a
                   key={l.href}
