@@ -79,11 +79,26 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         )
       }
-       if (!invoice.client?.phone) {
+
+      if (!invoice.client?.phone) {
         return NextResponse.json(
           {
             success: false,
             error: "This client doesn't have a phone number on file. Cashfree requires it to process payment — please add one to the client before sending this invoice.",
+            missingPhone: true,
+          },
+          { status: 400 }
+        )
+      }
+
+      // Validate phone format before sending to Cashfree
+      const cleanPhone = invoice.client.phone.replace(/\s/g, "")
+      const isValidPhone = /^(\+91|91)?[6-9]\d{9}$/.test(cleanPhone) || /^\+[1-9]\d{6,14}$/.test(cleanPhone)
+      if (!isValidPhone) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Client phone number "${invoice.client.phone}" is not valid. Please update it in the client profile (e.g. 9090407368) and try again.`,
             missingPhone: true,
           },
           { status: 400 }

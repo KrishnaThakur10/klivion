@@ -5,7 +5,7 @@ export const PLANS = {
     limits: {
       proposalsPerMonth: 3,
       invoicesPerMonth: 5,
-      clientsTotal: 2,
+      clientsTotal: 5,
     },
     features: {
       payments: false,

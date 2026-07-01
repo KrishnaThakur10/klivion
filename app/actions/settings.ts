@@ -7,7 +7,11 @@ import { z } from "zod"
 
 const SettingsSchema = z.object({
   businessName: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z.string()
+    .optional()
+    .refine(val => !val || /^(\+91|91)?[6-9]\d{9}$|^\+1[2-9]\d{9}$|^\+[1-9]\d{6,14}$/.test(val.replace(/\s/g, "")), {
+      message: "Enter a valid phone number (e.g. 9090407368 or +919090407368)",
+    }),
   address: z.string().optional(),
   website: z.string().optional(),
   paymentProvider: z.enum(["razorpay", "cashfree"]).optional(),
