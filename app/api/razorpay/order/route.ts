@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
         orderAmount: invoice.total, // Cashfree wants rupees, not paise
         customerName: invoice.client?.name || "Customer",
         customerEmail: invoice.client?.email || "no-reply@klivion.app",
-        customerPhone: invoice.client.phone,
+        customerPhone: cleanPhone,
         returnUrl: `${appUrl}/invoices/${invoice.id}?cf_order_id={order_id}`,
         notifyUrl: `${appUrl}/api/cashfree/webhook`,
         orderNote: `Payment for invoice ${invoice.number}`,

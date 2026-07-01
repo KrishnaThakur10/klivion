@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validate phone format — Cashfree rejects non-numeric/invalid numbers
+    // Validate phone format — strip spaces first, then check format
     const cleanPhone = settings.phone.replace(/\s/g, "")
     const isValidPhone = /^(\+91|91)?[6-9]\d{9}$/.test(cleanPhone) || /^\+[1-9]\d{6,14}$/.test(cleanPhone)
     if (!isValidPhone) {
@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       orderAmount: PLANS.pro.price,
       customerName: session.user.name || "Klivion User",
       customerEmail: session.user.email,
-      customerPhone: settings.phone,
+      customerPhone: cleanPhone,
       returnUrl: `${appUrl}/dashboard?upgrade=processing`,
       notifyUrl: `${appUrl}/api/cashfree/subscription-webhook`,
       orderNote: `Klivion Pro subscription — ${session.user.email}`,
