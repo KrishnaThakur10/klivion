@@ -25,8 +25,8 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen antialiased ">
-        <GoogleTagManager gtmId="G-GEEERHMDH7" />
         {children}
+        <GoogleTagManager gtmId="G-GEEERHMDH7" />
         <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
         <Analytics />
       </body>
