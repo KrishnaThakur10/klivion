@@ -6,7 +6,7 @@ export default async function Page() {
   const session = await auth()
   if (!session?.user?.id) return null
 
-  const [invoices, clients] = await Promise.all([
+  const [invoices, clients, settings] = await Promise.all([
     db.invoice.findMany({
       where: { userId: session.user.id },
       include: { client: true, lineItems: true },
@@ -16,7 +16,21 @@ export default async function Page() {
       where: { userId: session.user.id },
       orderBy: { name: "asc" },
     }),
+    db.userSettings.findUnique({
+      where: { userId: session.user.id },
+      select: {
+        paymentProvider: true,
+        razorpayKeyId: true,
+        cashfreeAppId: true,
+      },
+    }),
   ])
+
+  // Determine if the freelancer has a payment provider connected
+  const hasPaymentProvider =
+    (settings?.paymentProvider === "cashfree" && !!settings?.cashfreeAppId) ||
+    (settings?.paymentProvider !== "cashfree" && !!settings?.razorpayKeyId) ||
+    (!!settings?.razorpayKeyId || !!settings?.cashfreeAppId)
 
   return (
     <InvoicesPage
@@ -27,6 +41,7 @@ export default async function Page() {
         dueDate: inv.dueDate.toISOString(),
         total: inv.total,
         clientName: inv.client?.name ?? null,
+        clientPhone: inv.client?.phone ?? null,
         lineItems: inv.lineItems.map(li => ({
           id: li.id,
           description: li.description,
@@ -35,6 +50,8 @@ export default async function Page() {
         })),
       }))}
       clients={clients.map(c => ({ id: c.id, name: c.name }))}
+      paymentProvider={settings?.paymentProvider ?? "razorpay"}
+      hasPaymentProvider={hasPaymentProvider}
     />
   )
 }

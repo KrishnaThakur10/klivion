@@ -14,6 +14,7 @@ import {
   MoreHorizontal, Link as LinkIcon, X,
   Download
 } from "lucide-react"
+import { DatePicker } from "@/components/date-picker"
 import { UpgradeModal } from "@/components/upgrade-modal"
 
 type Client = { id: string; name: string }
@@ -25,6 +26,7 @@ type Invoice = {
   dueDate: string
   total: number
   clientName: string | null
+  clientPhone: string | null
   lineItems: LineItem[]
 }
 
@@ -175,9 +177,13 @@ function InvoiceMenu({
 export function InvoicesPage({
   invoices: initial,
   clients,
+  hasPaymentProvider = false,
+  paymentProvider = "razorpay",
 }: {
   invoices: Invoice[]
   clients: Client[]
+  hasPaymentProvider?: boolean
+  paymentProvider?: string
 }) {
   const router = useRouter()
   const [view, setView] = useState<"list" | "new">("list")
@@ -195,6 +201,8 @@ export function InvoicesPage({
   const [isPending, startTransition] = useTransition()
   const [showUpgrade, setShowUpgrade] = useState(false)
   const [upgradeReason, setUpgradeReason] = useState("")
+  const [preflightIssues, setPreflightIssues] = useState<string[]>([])
+  const [showPreflight, setShowPreflight] = useState(false)
 
   const subtotal = lineItems.reduce((sum, item) =>
     sum + (parseFloat(item.quantity) || 0) * (parseFloat(item.rate) || 0), 0)
@@ -259,9 +267,41 @@ export function InvoicesPage({
   }
 
   function handleStatus(id: string, status: string) {
+    // Pre-flight checks before sending — catch issues before the payer ever sees the invoice
+    if (status === "sent") {
+      const inv = invoices.find(i => i.id === id)
+      const issues: string[] = []
+
+      if (!hasPaymentProvider) {
+        issues.push(
+          paymentProvider === "cashfree"
+            ? "Connect your Cashfree account in Settings → Payment Provider"
+            : "Connect your Razorpay account in Settings → Payment Provider"
+        )
+      }
+
+      if (!inv?.clientName) {
+        issues.push("Assign a client to this invoice so the payer knows who to pay")
+      }
+
+      if (paymentProvider === "cashfree" && inv?.clientName && !inv?.clientPhone) {
+        issues.push("Add a phone number to this client — Cashfree requires it to process payment")
+      }
+
+      if ((inv?.total ?? 0) <= 0) {
+        issues.push("Add at least one line item with an amount greater than ₹0")
+      }
+
+      if (issues.length > 0) {
+        setPreflightIssues(issues)
+        setShowPreflight(true)
+        return
+      }
+    }
+
     startTransition(async () => {
       await updateInvoiceStatus(id, status)
-      router.refresh() // ── FIXED: re-fetches → status badge updates
+      router.refresh()
       if (status === "sent") {
         setShareLink(`${window.location.origin}/invoices/${id}`)
         setShowShare(true)
@@ -335,11 +375,10 @@ export function InvoicesPage({
                 style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
                 Due date *
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={dueDate}
-                onChange={e => setDueDate(e.target.value)}
-                className="ui-input"
+                onChange={setDueDate}
+                placeholder="Select due date"
               />
             </div>
           </div>
@@ -471,6 +510,89 @@ export function InvoicesPage({
           reason={upgradeReason}
           onClose={() => setShowUpgrade(false)}
         />
+      )}
+
+      {/* Pre-flight checklist modal — shown when invoice isn't ready to send */}
+      {showPreflight && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+          onClick={() => setShowPreflight(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl overflow-hidden"
+            style={{
+              background: "var(--bg-grid)",
+              border: "0.5px solid var(--hairline-strong)",
+              boxShadow: "var(--shadow-panel)",
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div
+              className="px-6 py-5 flex items-center gap-3"
+              style={{ borderBottom: "0.5px solid var(--hairline)" }}
+            >
+              <div
+                className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "rgba(255,159,10,0.14)" }}
+              >
+                <AlertCircle className="w-4 h-4" style={{ color: "var(--status-warning)" }} />
+              </div>
+              <div>
+                <p className="text-[14px] font-semibold" style={{ color: "var(--text)" }}>
+                  Invoice can't be sent yet
+                </p>
+                <p className="text-[12px] mt-0.5" style={{ color: "var(--text-3)" }}>
+                  Fix these before your client receives the payment link
+                </p>
+              </div>
+            </div>
+
+            {/* Issues list */}
+            <div className="px-6 py-5 space-y-3">
+              {preflightIssues.map((issue, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 px-4 py-3 rounded-xl"
+                  style={{ background: "var(--inset-fill)", border: "0.5px solid var(--hairline)" }}
+                >
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                    style={{ background: "rgba(255,159,10,0.14)" }}
+                  >
+                    <span className="text-[10px] font-bold" style={{ color: "var(--status-warning)" }}>
+                      {i + 1}
+                    </span>
+                  </div>
+                  <p className="text-[13px] leading-relaxed" style={{ color: "var(--text-2)" }}>
+                    {issue}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* Actions */}
+            <div
+              className="px-6 py-4 flex gap-2"
+              style={{ borderTop: "0.5px solid var(--hairline)" }}
+            >
+              <a
+                href="/dashboard/settings"
+                className="btn-primary flex-1 justify-center text-[13px]"
+                onClick={() => setShowPreflight(false)}
+              >
+                Go to Settings
+              </a>
+              <button
+                onClick={() => setShowPreflight(false)}
+                className="btn-ghost flex-1 justify-center text-[13px]"
+              >
+                Fix later
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Share modal */}
