@@ -151,7 +151,7 @@ function InvoiceMenu({
               style={{ color: "var(--text-2)" }}
             >
               <Download className="w-3.5 h-3.5 shrink-0" />
-              View & Download PDF
+              View & Download
             </button>
 
             <div style={{ height: "0.5px", background: "var(--hairline)", margin: "4px 0" }} />
