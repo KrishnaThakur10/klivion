@@ -466,7 +466,7 @@ function handleCreate() {
         </button>
       </header>
 
-      <div className="flex-1 p-4 md:p-8 max-w-270 w-full overflow-x-hidden">
+      <div className="flex-1 p-4 md:p-8 max-w-270 w-full mx-auto overflow-x-hidden">
 
         {/* Empty state */}
         {proposals.length === 0 && (

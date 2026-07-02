@@ -548,27 +548,33 @@ export function InvoicesPage({
         </button>
       </header>
 
-      <div className="flex-1 p-4 md:p-8 max-w-[1080px] w-full overflow-x-hidden space-y-6">
+      <div className="flex-1 p-4 md:p-8 max-w-[1080px] w-full mx-auto overflow-x-hidden space-y-6">
 
         {/* Stats */}
         {invoices.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: "Total Invoiced", value: totalInvoiced, color: "var(--text)" },
-              { label: "Paid", value: totalPaid, color: "var(--status-success)" },
-              { label: "Pending", value: totalPending, color: "var(--text-2)" },
-              { label: "Overdue", value: totalOverdue, color: totalOverdue > 0 ? "var(--status-error)" : "var(--text-3)" },
+              { label: "Total Invoiced", value: totalInvoiced, color: "var(--text)", dot: "rgba(255,255,255,0.3)", bg: "var(--bg-grid)" },
+              { label: "Paid",           value: totalPaid,     color: "var(--status-success)", dot: "var(--status-success)", bg: "var(--bg-grid)" },
+              { label: "Pending",        value: totalPending,  color: "var(--text-2)",         dot: "rgba(255,255,255,0.2)", bg: "var(--bg-grid)" },
+              { label: "Overdue",        value: totalOverdue,  color: totalOverdue > 0 ? "var(--status-error)" : "var(--text-3)", dot: totalOverdue > 0 ? "var(--status-error)" : "rgba(255,255,255,0.12)", bg: "var(--bg-grid)" },
             ].map(stat => (
               <div
                 key={stat.label}
-                className="rounded-xl p-4"
-                style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)" }}
+                className="rounded-xl p-4 flex flex-col gap-2"
+                style={{ background: stat.bg, border: "0.5px solid var(--hairline)", boxShadow: "var(--shadow-panel)" }}
               >
-                <p className="text-[11px] font-semibold uppercase tracking-wider mb-1.5"
-                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                  {stat.label}
-                </p>
-                <p className="text-[18px] font-bold" style={{ color: stat.color }}>
+                <div className="flex items-center justify-between">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.08em]"
+                    style={{ color: "rgba(255,255,255,0.22)", fontFamily: "var(--font-mono)" }}>
+                    {stat.label}
+                  </p>
+                  <div
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ background: stat.dot, boxShadow: `0 0 6px ${stat.dot}` }}
+                  />
+                </div>
+                <p className="text-[20px] font-bold leading-none" style={{ color: stat.color, letterSpacing: "-0.03em" }}>
                   ₹{stat.value.toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                 </p>
               </div>

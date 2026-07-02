@@ -239,7 +239,7 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
         </button>
       </header>
 
-      <div className="flex-1 p-4 md:p-8 max-w-[1080px] w-full overflow-x-hidden">
+      <div className="flex-1 p-4 md:p-8 max-w-[1080px] w-full mx-auto overflow-x-hidden">
 
         {clients.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 gap-4">
@@ -260,16 +260,28 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
             {clients.map((client) => (
               <div
                 key={client.id}
-                className="rounded-xl p-4 transition-all duration-150"
-                style={{ background: "var(--bg-grid)", border: "0.5px solid var(--hairline)" }}
+                className="rounded-xl p-5 transition-all duration-150"
+                style={{
+                  background: "var(--bg-grid)",
+                  border: "0.5px solid var(--hairline)",
+                  boxShadow: "var(--shadow-panel)",
+                }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--hairline-strong)"
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "var(--hairline)"
+                }}
               >
-                <div className="flex items-start justify-between mb-3">
+                {/* Card header */}
+                <div className="flex items-start justify-between mb-4">
                   <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center font-semibold text-[15px] shrink-0"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center font-bold text-[17px] shrink-0"
                     style={{
-                      background: "rgba(255,255,255,0.06)",
+                      background: "rgba(255,255,255,0.07)",
                       color: "var(--text-2)",
                       border: "0.5px solid var(--hairline-strong)",
+                      letterSpacing: "-0.02em",
                     }}
                   >
                     {client.name.charAt(0).toUpperCase()}
@@ -280,23 +292,28 @@ export function ClientsPage({ clients: initial }: { clients: Client[] }) {
                   />
                 </div>
 
-                <p className="text-[14px] font-semibold mb-2 truncate" style={{ color: "var(--text)" }}>
+                {/* Name */}
+                <p className="text-[15px] font-semibold mb-3 truncate" style={{ color: "var(--text)", letterSpacing: "-0.01em" }}>
                   {client.name}
                 </p>
 
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-2)" }}>
+                {/* Divider */}
+                <div style={{ height: "0.5px", background: "var(--hairline)", marginBottom: "12px" }} />
+
+                {/* Details */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2.5 text-[12px]" style={{ color: "var(--text-2)" }}>
                     <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-3)" }} />
                     <span className="truncate">{client.email}</span>
                   </div>
                   {client.company && (
-                    <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-2)" }}>
+                    <div className="flex items-center gap-2.5 text-[12px]" style={{ color: "var(--text-2)" }}>
                       <Building2 className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-3)" }} />
                       <span className="truncate">{client.company}</span>
                     </div>
                   )}
                   {client.phone && (
-                    <div className="flex items-center gap-2 text-[12px]" style={{ color: "var(--text-2)" }}>
+                    <div className="flex items-center gap-2.5 text-[12px]" style={{ color: "var(--text-2)" }}>
                       <Phone className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-3)" }} />
                       <span className="truncate">{client.phone}</span>
                     </div>

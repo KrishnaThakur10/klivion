@@ -38,6 +38,24 @@ type Proposal = {
   status: string
 }
 
+// Status config for invoice rows
+const invoiceStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
+  draft:   { label: "Draft",   color: "#6e6e73", bg: "rgba(255,255,255,0.06)" },
+  sent:    { label: "Sent",    color: "#a1a1a6", bg: "rgba(255,255,255,0.10)" },
+  paid:    { label: "Paid",    color: "#30d158", bg: "rgba(48,209,88,0.14)" },
+  overdue: { label: "Overdue", color: "#ff453a", bg: "rgba(255,69,58,0.14)" },
+}
+
+function getInvoiceStatus(inv: Invoice): string {
+  if (inv.status === "paid") return "paid"
+  if (inv.status === "sent" && new Date(inv.dueDate) < new Date()) return "overdue"
+  return inv.status
+}
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short" })
+}
+
 function MagicCard({
   children,
   className = "",
@@ -88,10 +106,10 @@ export function DashboardContent({
       style={{ background: "var(--bg)", fontFamily: "var(--font-ui)" }}
     >
       {/* Header */}
-        <header
-          className="h-14 flex items-center justify-between px-4 md:px-8 shrink-0"
-          style={{ borderBottom: "0.5px solid var(--hairline)" }}
-        >
+      <header
+        className="h-14 flex items-center justify-between px-6 md:px-8 shrink-0"
+        style={{ borderBottom: "0.5px solid var(--hairline)" }}
+      >
         <span
           className="text-[12px]"
           style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
@@ -108,16 +126,13 @@ export function DashboardContent({
         </Link>
       </header>
 
-      <div className="flex-1 p-4 md:p-8 w-full space-y-6 md:space-y-8">
+      <div className="flex-1 p-6 md:p-8 w-full space-y-6 md:space-y-8">
 
         {/* Greeting */}
         <div style={{ animation: "float-in 560ms var(--ease-apple) both" }}>
           <h1
-            className="text-[26px] font-semibold leading-tight"
-            style={{
-              color: "var(--text)",
-              letterSpacing: "-0.03em",
-            }}
+            className="text-[28px] font-semibold leading-tight"
+            style={{ color: "var(--text)", letterSpacing: "-0.03em" }}
           >
             {greeting}, {firstName}
           </h1>
@@ -126,7 +141,7 @@ export function DashboardContent({
           </p>
         </div>
 
-        {/* Stat Cards with magic hover */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {stats.map((stat) => {
             const Icon = ICONS[stat.icon] ?? FileText
@@ -140,7 +155,7 @@ export function DashboardContent({
                   boxShadow: "var(--shadow-panel)",
                 }}
               >
-                <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center justify-between mb-4">
                   <div
                     className="w-7 h-7 rounded-lg flex items-center justify-center"
                     style={{ background: "var(--inset-fill)" }}
@@ -155,26 +170,23 @@ export function DashboardContent({
                     className="w-1.5 h-1.5 rounded-full"
                     style={{
                       background: stat.dot,
-                      boxShadow: `0 0 8px ${stat.dot}`,
+                      boxShadow: `0 0 6px ${stat.dot}`,
                     }}
                   />
                 </div>
                 <p
-                  className="text-[22px] font-semibold leading-none mb-1.5"
-                  style={{ color: "var(--text)", letterSpacing: "-0.03em" }}
+                  className="text-[24px] font-bold leading-none mb-2"
+                  style={{ color: "var(--text)", letterSpacing: "-0.04em" }}
                 >
                   {stat.value}
                 </p>
                 <p
-                  className="text-[11px] font-semibold uppercase tracking-wider mb-0.5"
-                  style={{
-                    color: "var(--text-3)",
-                    fontFamily: "var(--font-mono)",
-                  }}
+                  className="text-[10px] font-semibold uppercase tracking-[0.08em] mb-0.5"
+                  style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
                 >
                   {stat.label}
                 </p>
-                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.2)" }}>
+                <p className="text-[11px]" style={{ color: "rgba(255,255,255,0.18)" }}>
                   {stat.sub}
                 </p>
               </MagicCard>
@@ -185,7 +197,7 @@ export function DashboardContent({
         {/* Main grid */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-          {/* Invoice table */}
+          {/* Invoice table — 3 cols */}
           <div
             className="lg:col-span-3 rounded-2xl overflow-hidden reveal"
             style={{
@@ -194,125 +206,81 @@ export function DashboardContent({
               boxShadow: "var(--shadow-panel)",
             }}
           >
+            {/* Table header */}
             <div
               className="flex items-center justify-between px-5 py-4"
               style={{ borderBottom: "0.5px solid var(--hairline)" }}
             >
-              <p
-                className="text-[13px] font-semibold"
-                style={{ color: "var(--text)" }}
-              >
+              <p className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>
                 Invoices
               </p>
-              <Link
-                href="/dashboard/invoices"
-                className="btn-ghost text-[12px] py-1 px-2.5"
-              >
+              <Link href="/dashboard/invoices" className="btn-ghost text-[12px] py-1 px-2.5">
                 View all <ArrowRight className="w-3 h-3" />
               </Link>
             </div>
 
+            {/* Column labels */}
+            <div
+              className="grid px-5 py-2"
+              style={{
+                gridTemplateColumns: "1fr 120px 72px 64px",
+                borderBottom: "0.5px solid rgba(255,255,255,0.04)",
+              }}
+            >
+              {["Invoice", "Client", "Due", "Amount"].map((h, i) => (
+                <span
+                  key={h}
+                  className={`text-[10px] font-semibold uppercase tracking-[0.08em] ${i > 0 ? "text-right" : ""}`}
+                  style={{ color: "rgba(255,255,255,0.18)", fontFamily: "var(--font-mono)" }}
+                >
+                  {h}
+                </span>
+              ))}
+            </div>
+
             {invoices.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-14 gap-2">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center"
-                  style={{
-                    background: "var(--inset-fill)",
-                    border: "0.5px solid var(--hairline)",
-                  }}
-                >
-                  <Receipt
-                    className="w-4 h-4"
-                    style={{ color: "var(--text-3)" }}
-                  />
-                </div>
-                <p className="text-[12px]" style={{ color: "var(--text-3)" }}>
-                  No invoices yet
-                </p>
-                <Link
-                  href="/dashboard/invoices"
-                  className="text-[11px]"
-                  style={{ color: "var(--text-3)" }}
-                >
-                  Create your first →
-                </Link>
+              <div className="flex flex-col items-center justify-center py-12 gap-2">
+                <Receipt className="w-6 h-6" style={{ color: "rgba(255,255,255,0.08)" }} />
+                <p className="text-[12px]" style={{ color: "var(--text-3)" }}>No invoices yet</p>
               </div>
             ) : (
-              <>
-                <div
-                  className="grid grid-cols-4 px-5 py-2.5"
-                  style={{
-                    borderBottom: "0.5px solid var(--hairline)",
-                    color: "var(--text-3)",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "10px",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  <span>Invoice</span>
-                  <span>Client</span>
-                  <span>Due</span>
-                  <span className="text-right">Amount</span>
-                </div>
-                {invoices.map((inv, i) => (
-                  <div
+              invoices.map((inv, i) => {
+                const derivedStatus = getInvoiceStatus(inv)
+                const sc = invoiceStatusConfig[derivedStatus] ?? invoiceStatusConfig.draft
+                return (
+                  <Link
                     key={inv.id}
-                    className="grid grid-cols-4 items-center px-5 py-3 transition-colors"
+                    href={`/invoices/${inv.id}`}
+                    className="grid px-5 py-3 transition-colors hover:bg-[rgba(255,255,255,0.03)]"
                     style={{
-                      borderBottom:
-                        i < invoices.length - 1
-                          ? "0.5px solid rgba(255,255,255,0.04)"
-                          : "none",
-                      cursor: "default",
+                      gridTemplateColumns: "1fr 120px 72px 64px",
+                      borderBottom: i < invoices.length - 1 ? "0.5px solid rgba(255,255,255,0.04)" : "none",
+                      textDecoration: "none",
                     }}
-                    onMouseEnter={e =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "var(--atmo-1)")
-                    }
-                    onMouseLeave={e =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "transparent")
-                    }
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{
-                          background:
-                            inv.status === "paid"
-                              ? "var(--status-success)"
-                              : inv.status === "sent"
-                              ? "rgba(255,255,255,0.4)"
-                              : "rgba(255,255,255,0.15)",
-                        }}
-                      />
-                      <span
-                        className="text-[12px] font-medium"
-                        style={{
-                          color: "var(--text)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        {inv.number}
-                      </span>
-                    </div>
+                    {/* Invoice number */}
                     <span
-                      className="text-[12px] truncate pr-2"
-                      style={{ color: "var(--text-2)" }}
+                      className="text-[12px] font-semibold self-center"
+                      style={{ color: "var(--text)", fontFamily: "var(--font-mono)" }}
+                    >
+                      {inv.number}
+                    </span>
+                    {/* Client */}
+                    <span
+                      className="text-[12px] self-center text-right truncate pl-2"
+                      style={{ color: inv.clientName ? "var(--text-2)" : "var(--text-3)" }}
                     >
                       {inv.clientName ?? "—"}
                     </span>
+                    {/* Due date */}
                     <span
-                      className="text-[12px]"
-                      style={{ color: "var(--text-3)" }}
+                      className="text-[11px] self-center text-right"
+                      style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
                     >
-                      {new Date(inv.dueDate).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                      })}
+                      {formatDate(inv.dueDate)}
                     </span>
-                    <div className="flex items-center justify-end gap-2">
+                    {/* Amount + status */}
+                    <div className="flex flex-col items-end justify-center gap-1">
                       <span
                         className="text-[12px] font-semibold"
                         style={{ color: "var(--text)" }}
@@ -320,29 +288,19 @@ export function DashboardContent({
                         ₹{inv.total.toLocaleString("en-IN")}
                       </span>
                       <span
-                        className="text-[10px] font-medium px-1.5 py-0.5 rounded-md"
-                        style={{
-                          fontFamily: "var(--font-mono)",
-                          background:
-                            inv.status === "paid"
-                              ? "var(--status-success-bg)"
-                              : "var(--inset-fill)",
-                          color:
-                            inv.status === "paid"
-                              ? "var(--status-success)"
-                              : "var(--text-3)",
-                        }}
+                        className="text-[9px] font-semibold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded-full"
+                        style={{ background: sc.bg, color: sc.color, fontFamily: "var(--font-mono)" }}
                       >
-                        {inv.status}
+                        {sc.label}
                       </span>
                     </div>
-                  </div>
-                ))}
-              </>
+                  </Link>
+                )
+              })
             )}
           </div>
 
-          {/* Right column */}
+          {/* Right column — 2 cols */}
           <div className="lg:col-span-2 flex flex-col gap-4">
 
             {/* Proposals */}
@@ -358,97 +316,60 @@ export function DashboardContent({
                 className="flex items-center justify-between px-5 py-4"
                 style={{ borderBottom: "0.5px solid var(--hairline)" }}
               >
-                <p
-                  className="text-[13px] font-semibold"
-                  style={{ color: "var(--text)" }}
-                >
+                <p className="text-[13px] font-semibold" style={{ color: "var(--text)" }}>
                   Proposals
                 </p>
-                <Link
-                  href="/dashboard/proposals"
-                  className="btn-ghost text-[12px] py-1 px-2.5"
-                >
+                <Link href="/dashboard/proposals" className="btn-ghost text-[12px] py-1 px-2.5">
                   View all <ArrowRight className="w-3 h-3" />
                 </Link>
               </div>
 
               {proposals.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-1.5">
-                  <FileText
-                    className="w-5 h-5"
-                    style={{ color: "rgba(255,255,255,0.1)" }}
-                  />
-                  <p
-                    className="text-[12px]"
-                    style={{ color: "var(--text-3)" }}
-                  >
-                    No proposals yet
-                  </p>
+                <div className="flex flex-col items-center justify-center py-10 gap-2">
+                  <FileText className="w-5 h-5" style={{ color: "rgba(255,255,255,0.08)" }} />
+                  <p className="text-[12px]" style={{ color: "var(--text-3)" }}>No proposals yet</p>
                 </div>
               ) : (
                 proposals.map((p, i) => (
-                  <div
+                  <Link
                     key={p.id}
-                    className="flex items-center gap-3 px-5 py-3 transition-colors"
+                    href="/dashboard/proposals"
+                    className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-[rgba(255,255,255,0.03)]"
                     style={{
-                      borderBottom:
-                        i < proposals.length - 1
-                          ? "0.5px solid rgba(255,255,255,0.04)"
-                          : "none",
+                      borderBottom: i < proposals.length - 1 ? "0.5px solid rgba(255,255,255,0.04)" : "none",
+                      textDecoration: "none",
                     }}
-                    onMouseEnter={e =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "var(--atmo-1)")
-                    }
-                    onMouseLeave={e =>
-                      ((e.currentTarget as HTMLElement).style.background =
-                        "transparent")
-                    }
                   >
                     <div
                       className="w-5 h-5 rounded-md flex items-center justify-center shrink-0"
                       style={{
-                        background:
-                          p.status === "signed"
-                            ? "var(--status-success-bg)"
-                            : "var(--inset-fill)",
+                        background: p.status === "signed"
+                          ? "var(--status-success-bg)"
+                          : p.status === "sent"
+                          ? "rgba(255,255,255,0.06)"
+                          : "var(--inset-fill)",
                       }}
                     >
                       {p.status === "signed" ? (
-                        <CheckCircle2
-                          className="w-3 h-3"
-                          style={{ color: "var(--status-success)" }}
-                        />
+                        <CheckCircle2 className="w-3 h-3" style={{ color: "var(--status-success)" }} />
                       ) : p.status === "sent" ? (
-                        <Clock
-                          className="w-3 h-3"
-                          style={{ color: "var(--text-3)" }}
-                        />
+                        <Clock className="w-3 h-3" style={{ color: "var(--text-3)" }} />
                       ) : (
-                        <AlertCircle
-                          className="w-3 h-3"
-                          style={{ color: "rgba(255,255,255,0.2)" }}
-                        />
+                        <AlertCircle className="w-3 h-3" style={{ color: "rgba(255,255,255,0.2)" }} />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p
-                        className="text-[12px] font-medium truncate"
-                        style={{ color: "var(--text)" }}
-                      >
+                      <p className="text-[12px] font-medium truncate" style={{ color: "var(--text)" }}>
                         {p.title}
                       </p>
                       <p
-                        className="text-[11px] capitalize mt-0.5"
-                        style={{
-                          color: "var(--text-3)",
-                          fontFamily: "var(--font-mono)",
-                        }}
+                        className="text-[10px] capitalize mt-0.5 font-semibold"
+                        style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
                       >
                         {p.status}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 ))
               )}
             </div>
@@ -464,18 +385,15 @@ export function DashboardContent({
             >
               <p
                 className="text-[10px] font-semibold uppercase tracking-[0.1em] mb-3"
-                style={{
-                  color: "var(--text-3)",
-                  fontFamily: "var(--font-mono)",
-                }}
+                style={{ color: "var(--text-3)", fontFamily: "var(--font-mono)" }}
               >
                 Quick actions
               </p>
               <div className="space-y-1.5">
                 {[
                   { href: "/dashboard/proposals", label: "New Proposal", icon: FileText },
-                  { href: "/dashboard/invoices", label: "New Invoice", icon: Receipt },
-                  { href: "/dashboard/clients", label: "Add Client", icon: Users },
+                  { href: "/dashboard/invoices",  label: "New Invoice",  icon: Receipt },
+                  { href: "/dashboard/clients",   label: "Add Client",   icon: Users },
                 ].map((action) => {
                   const Icon = action.icon
                   return (
@@ -499,15 +417,8 @@ export function DashboardContent({
                       }}
                     >
                       <div className="flex items-center gap-2.5">
-                        <Icon
-                          className="w-3.5 h-3.5 shrink-0"
-                          style={{ color: "var(--text-3)" }}
-                          strokeWidth={1.5}
-                        />
-                        <span
-                          className="text-[12px] font-medium"
-                          style={{ color: "var(--text-2)" }}
-                        >
+                        <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: "var(--text-3)" }} strokeWidth={1.5} />
+                        <span className="text-[12px] font-medium" style={{ color: "var(--text-2)" }}>
                           {action.label}
                         </span>
                       </div>
